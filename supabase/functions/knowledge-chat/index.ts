@@ -2,20 +2,33 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { authenticate } from '../_shared/portal-auth.ts';
 
-const origin = Deno.env.get('PORTAL_ORIGIN') ?? '';
+// Allow only trusted browser origins, matching identity-exchange's staging policy.
+const primaryOrigin = Deno.env.get('PORTAL_ORIGIN')?.trim() ?? '';
+const permittedOrigins = new Set([
+  primaryOrigin,
+  ...(Deno.env.get('PORTAL_ALLOWED_ORIGINS') ?? '').split(',').map(value => value.trim()),
+].filter(Boolean));
 const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
 const anon = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
 const key = Deno.env.get('OPENAI_API_KEY') ?? '';
 const embeddingModel = 'text-embedding-3-small'; // 1536 dims, matches knowledge_vectors.
 const model = Deno.env.get('OPENAI_CHAT_MODEL') || 'gpt-4.1-mini';
 
-function reply(body:unknown,status=200){
-  return new Response(JSON.stringify(body),{status,headers:{
-    'Content-Type':'application/json','Cache-Control':'no-store',
-    'Access-Control-Allow-Origin':origin,'Vary':'Origin',
-    'Access-Control-Allow-Headers':'authorization,apikey,content-type',
-    'Access-Control-Allow-Methods':'POST,OPTIONS',
-  }});
+function reply(req: Request, body: unknown, status = 200): Response {
+  const origin = req.headers.get('Origin') ?? '';
+  const cors = permittedOrigins.has(origin) ? {
+    'Access-Control-Allow-Origin': origin,
+    'Access-Control-Allow-Headers': 'authorization,apikey,content-type',
+    'Access-Control-Allow-Methods': 'POST,OPTIONS',
+  } : {};
+  return new Response(status === 204 ? null : JSON.stringify(body), {
+    status, headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'no-store',
+      'Vary': 'Origin',
+      ...cors,
+    },
+  });
 }
 
 async function openAI(path:string,body:unknown){
@@ -30,16 +43,22 @@ async function openAI(path:string,body:unknown){
 
 type Chunk={document_id:string;title:string;page_from:number;page_to:number;content:string;distance:number};
 Deno.serve(async req=>{
-  if(req.method==='OPTIONS') return reply({},204);
-  if(req.method!=='POST'||req.headers.get('Origin')!==origin) return reply({error:'Forbidden'},403);
+  const origin = req.headers.get('Origin') ?? '';
+  if (req.method === 'OPTIONS') {
+    if (!permittedOrigins.has(origin)) return reply(req, {error:'Forbidden'},403);
+    return reply(req, {}, 204);
+  }
+  if (req.method !== 'POST' || !permittedOrigins.has(origin)) {
+    return reply(req, {error:'Forbidden'},403);
+  }
   try {
     const actor=await authenticate(req); // Live status, valid signature and grant checks.
-    if(Number(req.headers.get('content-length')||0)>16000) return reply({error:'Request too large'},413);
+    if(Number(req.headers.get('content-length')||0)>16000) return reply(req, {error:'Request too large'},413);
     const input=await req.json() as {question?:unknown;collection?:unknown;history?:unknown};
     const question=typeof input.question==='string'?input.question.trim():'';
-    if(question.length<2||question.length>1200) return reply({error:'Question must be 2–1200 characters'},400);
-    if(input.collection!=='organization') return reply({error:'Unsupported collection'},400);
-    if(!key) return reply({error:'AI provider is not configured. Ask the Tech & Security team to set OPENAI_API_KEY.'},503);
+    if(question.length<2||question.length>1200) return reply(req, {error:'Question must be 2–1200 characters'},400);
+    if(input.collection!=='organization') return reply(req, {error:'Unsupported collection'},400);
+    if(!key) return reply(req, {error:'AI provider is not configured. Ask the Tech & Security team to set OPENAI_API_KEY.'},503);
 
     // Use the caller's JWT, not the service-role key: match_knowledge enforces
     // the approved document classification and each live department grant.
@@ -51,7 +70,7 @@ Deno.serve(async req=>{
     const {data:approved,error:metaError}=await userDB.from('knowledge_documents')
       .select('id').eq('collection','organization').limit(1);
     if(metaError) throw new Error('approved_metadata_query_failed');
-    if(!approved?.length) return reply({
+    if(!approved?.length) return reply(req, {
       answer:'No approved Study0SG knowledge documents are available to your account yet. Ask a Fore Director to add and approve a knowledge resource.',sources:[]
     });
 
@@ -64,7 +83,7 @@ Deno.serve(async req=>{
     });
     if(error) throw new Error('knowledge_retrieval_failed');
     const chunks=(data??[]) as Chunk[];
-    if(!chunks.length) return reply({answer:'I could not find approved source passages that answer this. Please check with your Study0SG Director.',sources:[]});
+    if(!chunks.length) return reply(req, {answer:'I could not find approved source passages that answer this. Please check with your Study0SG Director.',sources:[]});
 
     const sourceText=chunks.map((c,i)=>`[${i+1}] ${c.title}, pp. ${c.page_from}-${c.page_to}\n${c.content}`).join('\n\n');
     const provided=Array.isArray(input.history)?input.history.slice(-4):[];
@@ -85,11 +104,11 @@ Deno.serve(async req=>{
     const hasSource=chunks.some((_,i)=>answer.includes(`[${i+1}]`));
     const safeAnswer=hasSource?answer:`I found these approved passages, but couldn't produce a reliably cited answer. Please review the sources below.`;
     console.info('[knowledge-chat] response_completed', {actor_id:actor.id,chunk_count:chunks.length});
-    return reply({answer:safeAnswer,sources:chunks.map(c=>({document_id:c.document_id,title:c.title,page_from:c.page_from,page_to:c.page_to,distance:c.distance}))});
+    return reply(req, {answer:safeAnswer,sources:chunks.map(c=>({document_id:c.document_id,title:c.title,page_from:c.page_from,page_to:c.page_to,distance:c.distance}))});
   }catch(error){
     const label=error instanceof Error?error.message:'unknown';
     // Log only stable error labels. No document text or conversation history.
     console.error('[knowledge-chat] failure', label.startsWith('provider_http_')?label:'server_error');
-    return reply({error:'Knowledge assistant unavailable. Check its Edge Function logs and AI provider configuration.'},503);
+    return reply(req, {error:'Knowledge assistant unavailable. Check its Edge Function logs and AI provider configuration.'},503);
   }
 });
