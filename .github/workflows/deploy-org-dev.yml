@@ -1,6 +1,5 @@
-# Study0SG Organizer Portal: manual staging deployment to GitHub Pages.
-# Save at the REPOSITORY ROOT: .github/workflows/deploy-org-dev.yml
-# Monorepo layout assumed: organizer-portal/package.json
+# Study0SG organizer staging: repository ROOT contains package.json and src/.
+# Environment variables come from Settings > Environments > org-dev.
 name: Study0SG | Deploy Org Dev
 
 on:
@@ -19,29 +18,31 @@ jobs:
     if: github.repository == 'ZulTheDev/mystudy0sg-test-'
     runs-on: ubuntu-latest
     environment: org-dev
-    permissions:
-      contents: read
-    defaults:
-      run:
-        working-directory: organizer-portal
+
     env:
-      # Non-secret frontend values, configured in GitHub's org-dev Environment.
       VITE_DEPLOYMENT_STAGE: staging
       VITE_BASE_PATH: /mystudy0sg-test-/
       VITE_STYTCH_PUBLIC_TOKEN: ${{ vars.VITE_STYTCH_PUBLIC_TOKEN }}
       VITE_STYTCH_ORGANIZATION_ID: ${{ vars.VITE_STYTCH_ORGANIZATION_ID }}
       VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
       VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
+
+      - name: Confirm expected repository layout
+        run: |
+          test -f package.json
+          test -f package-lock.json
+          test -f scripts/release-preflight.mjs
 
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
-          cache-dependency-path: organizer-portal/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies (including native optional packages)
         run: npm ci --include=optional
@@ -64,7 +65,7 @@ jobs:
       - name: Test mobile screens
         run: npm run test:mobile
 
-      - name: Build production assets using staging configuration
+      - name: Build assets with staging configuration
         run: npm run build
 
       - name: Configure GitHub Pages
@@ -73,7 +74,7 @@ jobs:
       - name: Upload generated site
         uses: actions/upload-pages-artifact@v4
         with:
-          path: organizer-portal/dist
+          path: dist
 
   deploy-org-dev:
     name: Publish organizer staging site
