@@ -27,6 +27,7 @@ jobs:
       VITE_STYTCH_ORGANIZATION_ID: ${{ secrets.VITE_STYTCH_ORGANIZATION_ID }}
       VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
       VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+      DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
 
     steps:
       - name: Checkout source
