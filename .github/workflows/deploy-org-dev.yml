@@ -1,5 +1,6 @@
 # Study0SG organizer staging: repository ROOT contains package.json and src/.
-# Environment variables come from Settings > Environments > org-dev.
+# Public Vite config is stored as org-dev Environment Secrets in GitHub.
+# Note: VITE_* settings are embedded in browser builds and are not private at runtime.
 name: Study0SG | Deploy Org Dev
 
 on:
@@ -22,10 +23,10 @@ jobs:
     env:
       VITE_DEPLOYMENT_STAGE: staging
       VITE_BASE_PATH: /mystudy0sg-test-/
-      VITE_STYTCH_PUBLIC_TOKEN: ${{ vars.VITE_STYTCH_PUBLIC_TOKEN }}
-      VITE_STYTCH_ORGANIZATION_ID: ${{ vars.VITE_STYTCH_ORGANIZATION_ID }}
-      VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
-      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+      VITE_STYTCH_PUBLIC_TOKEN: ${{ secrets.VITE_STYTCH_PUBLIC_TOKEN }}
+      VITE_STYTCH_ORGANIZATION_ID: ${{ secrets.VITE_STYTCH_ORGANIZATION_ID }}
+      VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
 
     steps:
       - name: Checkout source
