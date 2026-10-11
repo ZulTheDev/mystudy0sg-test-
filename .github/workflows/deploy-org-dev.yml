@@ -1,5 +1,6 @@
 # Study0SG organizer staging: repository ROOT contains package.json and src/.
-# Environment variables come from Settings > Environments > org-dev.
+# Public Vite config is stored as org-dev Environment Secrets in GitHub.
+# Note: VITE_* settings are embedded in browser builds and are not private at runtime.
 name: Study0SG | Deploy Org Dev
 
 on:
