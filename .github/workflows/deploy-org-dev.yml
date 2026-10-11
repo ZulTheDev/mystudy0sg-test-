@@ -1,0 +1,91 @@
+# Study0SG Organizer Portal: manual staging deployment to GitHub Pages.
+# Save at the REPOSITORY ROOT: .github/workflows/deploy-org-dev.yml
+# Monorepo layout assumed: organizer-portal/package.json
+name: Study0SG | Deploy Org Dev
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: study0sg-org-dev-pages
+  cancel-in-progress: false
+
+jobs:
+  build-org-dev:
+    name: Verify and bundle organizer portal
+    if: github.repository == 'ZulTheDev/mystudy0sg-test-'
+    runs-on: ubuntu-latest
+    environment: org-dev
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: organizer-portal
+    env:
+      # Non-secret frontend values, configured in GitHub's org-dev Environment.
+      VITE_DEPLOYMENT_STAGE: staging
+      VITE_BASE_PATH: /mystudy0sg-test-/
+      VITE_STYTCH_PUBLIC_TOKEN: ${{ vars.VITE_STYTCH_PUBLIC_TOKEN }}
+      VITE_STYTCH_ORGANIZATION_ID: ${{ vars.VITE_STYTCH_ORGANIZATION_ID }}
+      VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: organizer-portal/package-lock.json
+
+      - name: Install dependencies (including native optional packages)
+        run: npm ci --include=optional
+
+      - name: Verify staging configuration without printing values
+        run: node scripts/release-preflight.mjs staging
+
+      - name: Check navigation
+        run: npm run check:nav
+
+      - name: Check TypeScript
+        run: npm run typecheck
+
+      - name: Test design studios
+        run: npm run test:studios
+
+      - name: Test security lab
+        run: npm run test:security
+
+      - name: Test mobile screens
+        run: npm run test:mobile
+
+      - name: Build production assets using staging configuration
+        run: npm run build
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload generated site
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: organizer-portal/dist
+
+  deploy-org-dev:
+    name: Publish organizer staging site
+    needs: build-org-dev
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
