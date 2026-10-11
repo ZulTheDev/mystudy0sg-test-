@@ -1,0 +1,102 @@
+/* Study0SG · Security Observatory and health history
+   Generated from the uploaded stylesheet. Keep existing class names. */
+
+.monitor-service-grid {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 15px;
+}
+
+.monitor-chip {
+  display: inline-block;
+  padding: 5px 11px;
+  border-radius: 99px;
+  font-weight: 700;
+  font-size: 12px;
+  background: #eee;
+  color: #555;
+}
+
+.monitor-chip.healthy {
+  background: #e7f5e7;
+  color: #256235;
+}
+
+.monitor-chip.degraded {
+  background: #fff2dd;
+  color: #875400;
+}
+
+.monitor-chip.down {
+  background: #fee8e4;
+  color: #9c2e21;
+}
+
+.monitor-chip.unconfigured,.monitor-chip.stale {
+  background: #ece8e4;
+  color: #63564c;
+}
+
+.monitor-bars {
+  display: flex;
+  gap: 3px;
+  align-items: end;
+  min-height: 23px;
+  margin-top: 12px;
+}
+
+.monitor-bar {
+  width: 8px;
+  max-width: 14px;
+  height: 18px;
+  border-radius: 3px;
+  background: #d9d1c9;
+  flex: 1;
+}
+
+.monitor-bar.healthy {
+  background: #6bb17e;
+}
+
+.monitor-bar.degraded {
+  background: #f2bd53;
+}
+
+.monitor-bar.down {
+  background: #df7664;
+}
+
+.monitor-bar.unconfigured {
+  background: #c7c4bf;
+}
+
+.monitor-traces {
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  margin-top: 12px;
+}
+
+.monitor-traces table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.monitor-traces th,.monitor-traces td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.monitor-traces th {
+  background: var(--color-surface-muted);
+  color: var(--color-text-muted);
+}
+
+@media (max-width:800px) {
+  .monitor-service-grid {
+    grid-template-columns: 1fr;
+  }
+}

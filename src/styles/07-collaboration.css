@@ -1,0 +1,58 @@
+/* Study0SG · Shared editors and defensive tool cards
+   Generated from the uploaded stylesheet. Keep existing class names. */
+
+.studio-collaboration {
+  padding: 18px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  margin: 20px 0;
+  background: var(--color-surface-muted);
+}
+
+.studio-share-panel {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+}
+
+.tool-rule-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(210px,1fr));
+  gap: 12px;
+  margin: 14px 0;
+}
+
+.tool-rule-card {
+  border: 1px solid var(--color-border);
+  border-radius: 13px;
+  padding: 16px;
+  background: var(--color-surface-muted);
+  display: grid;
+  gap: 8px;
+}
+
+.tool-rule-card p {
+  font-size: 13px;
+}
+
+.tool-rule-card label {
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (max-width:720px) {
+  .header-actions {
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .theme-toggle {
+    white-space: nowrap;
+  }
+
+  .tool-rule-grid {
+    grid-template-columns: 1fr;
+  }
+}

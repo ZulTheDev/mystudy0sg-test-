@@ -1,0 +1,29 @@
+/* ==========================================================================
+   Study0SG Brand Mark — vector traced from supplied brush logo.
+   One component in the dashboard header and login page.
+   Color is controlled only by the shared theme palette.
+   ========================================================================== */
+.study0sg-logo-mark {
+  display: block;
+  inline-size: 64px;
+  block-size: 64px;
+  flex: 0 0 auto;
+  color: var(--color-accent);
+  overflow: visible;
+}
+
+.dashboard-header .brand-trigger .study0sg-logo-mark {
+  inline-size: 49px;
+  block-size: 49px;
+}
+
+@media (max-width: 540px) {
+  .dashboard-header .brand-trigger .study0sg-logo-mark {
+    inline-size: 42px;
+    block-size: 42px;
+  }
+  .intro-panel .study0sg-logo-mark {
+    inline-size: 52px;
+    block-size: 52px;
+  }
+}

@@ -1,0 +1,332 @@
+/* Study0SG · Global layout, authentication, and setup screens
+   Generated from the uploaded stylesheet. Keep existing class names. */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+}
+
+button, input {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+h1, h2, h3, .brand-name {
+  font-family: ui-rounded, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+}
+
+.page-wrap {
+  min-height: 100dvh;
+  background: radial-gradient(circle at 8% 8%, var(--color-accent-wash), transparent 42%), var(--color-app);
+  display: flex;
+  flex-direction: column;
+}
+
+.portal-grid {
+  width: min(1120px, calc(100% - 48px));
+  margin: auto;
+  display: grid;
+  grid-template-columns: 1.1fr .9fr;
+  gap: 56px;
+  padding: 70px 0 36px;
+  align-items: center;
+}
+
+.brand {
+  text-decoration: none;
+  display: inline-flex;
+  gap: 14px;
+  align-items: center;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.brand-icon {
+  display: inline-grid;
+  place-items: center;
+  height: 64px;
+  width: 64px;
+  border-radius: 22px;
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-family: ui-rounded, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  font-size: 23px;
+  box-shadow: 0 12px 24px #ed9b3030;
+}
+
+.brand-icon span {
+  font-size: 17px;
+}
+
+.brand-name {
+  color: var(--color-text-strong);
+}
+
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: .16em;
+  font-weight: 800;
+  color: var(--color-accent-text);
+}
+
+.intro-panel .eyebrow {
+  display: block;
+  margin-top: 74px;
+}
+
+.intro-panel h1 {
+  font-size: clamp(35px, 4.1vw, 61px);
+  line-height: 1.14;
+  letter-spacing: -.045em;
+  margin: 22px 0;
+  color: var(--color-text-strong);
+}
+
+.intro-panel h1 span {
+  color: var(--color-accent-text);
+}
+
+.intro-panel > p:not(.intro-footnote) {
+  max-width: 500px;
+  line-height: 1.85;
+  font-size: 16px;
+  color: var(--color-text-muted);
+}
+
+.pill-list {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 26px;
+}
+
+.pill-list span {
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 100px;
+  padding: 9px 14px;
+  font-size: 12px;
+  color: var(--color-accent-text);
+}
+
+.intro-footnote {
+  margin-top: 68px;
+  color: #af866b;
+  font-size: 13px;
+}
+
+.login-panel {
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 28px;
+  box-shadow: 0 24px 65px #7a482016;
+  padding: 40px 36px;
+  min-width: 0;
+}
+
+.login-head {
+  text-align: center;
+}
+
+.login-head .lock-badge {
+  display: inline-grid;
+  place-items: center;
+  color: var(--color-accent-text);
+  background: var(--color-surface-muted);
+  border-radius: 50%;
+  width: 54px;
+  height: 54px;
+  font-size: 25px;
+  margin-bottom: 18px;
+}
+
+.login-head h2 {
+  font-size: 25px;
+  letter-spacing: -.03em;
+  margin: 12px 0 8px;
+}
+
+.login-head p:last-child {
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 1.7;
+  max-width: 335px;
+  margin: 0 auto;
+}
+
+.stytch-container {
+  margin-top: 28px;
+  width: 100%;
+  min-height: 175px;
+}
+
+.login-disclaimer {
+  color: var(--color-text-muted);
+  font-size: 11px;
+  line-height: 1.7;
+  text-align: center;
+  border-top: 1px solid var(--color-border);
+  padding-top: 18px;
+  margin-top: 18px;
+}
+
+.site-footer {
+  text-align: center;
+  color: var(--color-text-subtle);
+  font-size: 12px;
+  padding: 16px 0 26px;
+}
+
+.setup-page {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 20% 0%, var(--color-accent-wash), var(--color-app) 60%);
+  padding: 24px;
+}
+
+.setup-card {
+  width: min(570px, 100%);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 24px;
+  box-shadow: 0 16px 48px #6d442018;
+  padding: clamp(26px, 5vw, 48px);
+}
+
+.setup-card .eyebrow {
+  display: block;
+  margin-top: 42px;
+}
+
+.setup-card h1 {
+  font-size: clamp(25px, 4vw, 34px);
+  line-height: 1.35;
+  margin: 14px 0;
+}
+
+.setup-card p, .dashboard-card p {
+  line-height: 1.7;
+  color: var(--color-text-muted);
+}
+
+.setup-instructions {
+  padding: 15px;
+  background: var(--color-surface-muted);
+  border-radius: 12px;
+  overflow-x: auto;
+}
+
+.setup-instructions p {
+  margin: 0 0 12px;
+  font-size: 13px;
+}
+
+.setup-instructions p:last-child {
+  margin-bottom: 0;
+}
+
+.setup-instructions pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
+
+.muted-note {
+  font-size: 12px;
+  color: var(--color-text-muted) !important;
+}
+
+.auth-status {
+  min-height: 80dvh;
+  display: grid;
+  place-items: center;
+  color: var(--color-text-muted);
+}
+
+.dashboard-page {
+  min-height: 100dvh;
+  background: var(--color-app);
+  padding: 28px;
+}
+
+.dashboard-header {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dashboard-card {
+  background: var(--color-surface-raised);
+  max-width: 800px;
+  margin: 90px auto 0;
+  border: 1px solid var(--color-border);
+  border-radius: 24px;
+  padding: clamp(24px, 5vw, 50px);
+  box-shadow: 0 18px 38px #7a48200e;
+}
+
+.dashboard-card h1 {
+  color: var(--color-accent-text);
+}
+
+.retry-button, .signout-button {
+  background: var(--color-accent);
+  color: var(--color-text-strong);
+  border: 0;
+  border-radius: 12px;
+  padding: 12px 18px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.retry-button:hover, .signout-button:hover {
+  background: var(--color-accent-hover);
+}
+
+.retry-button:focus-visible, .signout-button:focus-visible, a:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+@media (max-width: 850px) {
+  .portal-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    max-width: 540px;
+    padding-top: 24px;
+  }
+
+  .intro-panel .eyebrow {
+    margin-top: 42px;
+  }
+
+  .intro-panel h1 {
+    font-size: 39px;
+  }
+
+  .intro-footnote {
+    display: none;
+  }
+
+  .login-panel {
+    padding: 30px 22px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation: none !important;
+  }
+}

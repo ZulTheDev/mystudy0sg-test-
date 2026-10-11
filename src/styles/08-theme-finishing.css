@@ -1,0 +1,174 @@
+/* ==========================================================================
+   Shared themes and contrast fixes.
+   Use tokens first; keep targeted overrides only for special legacy widgets.
+   This file comes LAST to keep the cascade predictable.
+   ========================================================================== */
+
+/* Common UI controls and nested panels */
+body { background: var(--color-app); color: var(--color-text); }
+:where(.dashboard-page, .page-wrap, .setup-page) { background-color: var(--color-app); }
+:where(.workspace-nav, .workspace-main, .dashboard-card, .login-panel, .setup-card,
+  .record-card, .editor-box, .studio-toolbox, .studio-properties, .quick-nav,
+  .studio-collaboration, .tool-rule-card) {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+:where(.dashboard-stats > div, .metric, .studio-tool, .studio-layer, .v14-row,
+  .v14-block-editor, .v14-service, .v14-service-map, .v14-chat-people,
+  .v14-chat-feed, .v14-message, .chat-window, .chat-bubble, .monitor-traces th) {
+  background: var(--color-surface-raised);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+:where(.empty-state, .v14-wire-preview, .v14-lesson, .studio-preview-area,
+  .studio-rule, .studio-service-map, .setup-instructions, .pill-list span) {
+  background: var(--color-surface-muted);
+  border-color: var(--color-border);
+  color: var(--color-text-muted);
+}
+:where(.workspace-main, .workspace-nav, .quick-nav, .record-card, .editor-box, .metric,
+  .studio-toolbox, .studio-properties, .studio-collaboration) :where(p, strong, h1, h2, h3, small, label) {
+  color: inherit;
+}
+:where(.field, .studio-properties) :where(input, select, textarea),
+:where(.workspace-main) :where(input, select, textarea),
+.chat-compose textarea {
+  background: var(--color-surface-inset);
+  color: var(--color-text);
+  border-color: var(--color-border-strong);
+}
+:where(input, textarea)::placeholder { color: var(--color-text-subtle); opacity: 1; }
+:where(.workspace-main, .workspace-nav) :where(a, button, input, select, textarea):focus-visible,
+:where(.quick-nav) :where(button, a):focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+}
+:where(.record-meta, .hint, .muted-note, .section-lead, .nav-group-label small,
+  .brand-caption, .header-role, .v14-message small) { color: var(--color-text-muted); }
+
+/* Orange buttons always have dark ink, for legible accessible labels. */
+:where(.retry-button, .signout-button, .nav-item.selected, .grouped-nav .nav-item.selected,
+  .studio-tab-active, .module-section button:not(.secondary-button):not(.danger-button),
+  .form-actions button:not(.secondary-button), .chat-compose button) {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+:where(.retry-button, .signout-button, .module-section button:not(.secondary-button):not(.danger-button)):hover:not(:disabled) {
+  background: var(--color-accent-hover);
+}
+:where(.nav-item:hover, .nav-group-trigger:hover, .nav-group-trigger[aria-expanded="true"],
+  .quick-nav-group > button:hover, .studio-layer.selected) {
+  background: var(--color-accent-soft);
+  color: var(--color-text-strong);
+}
+:where(.status-tag, .monitor-chip) { border: 1px solid transparent; }
+:where(.status-active, .status-approved, .status-published, .status-done, .status-normal,
+  .monitor-chip.healthy) { background: var(--color-success-surface); color: var(--color-success-text); }
+:where(.status-pending, .status-invited, .status-doing, .status-draft,
+  .monitor-chip.degraded) { background: var(--color-warning-surface); color: var(--color-warning-text); }
+:where(.status-suspended, .status-rejected, .status-attention, .status-cancelled,
+  .monitor-chip.down) { background: var(--color-danger-surface); color: var(--color-danger-text); }
+
+/* Dark mode: repair light-only classes and the bright white empty-state cards. */
+:root[data-theme="dark"] :where(.dashboard-stats > div, .metric, .record-card, .v14-row,
+  .v14-chat-people, .v14-chat-feed, .v14-message, .chat-window, .chat-bubble,
+  .studio-tool, .studio-layer, .studio-collaboration, .tool-rule-card) {
+  background: var(--color-surface-raised);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+:root[data-theme="dark"] :where(.empty-state, .v14-wire-preview, .v14-lesson,
+  .studio-preview-area, .studio-rule, .studio-service-map, .setup-instructions,
+  .studio-canvas-wrap, .v14-poster-frame, .v14-block-editor,
+  .dashboard-stats > div, .nav-group-trigger[aria-expanded="true"]) {
+  background: var(--color-surface-muted);
+  border-color: var(--color-border);
+  color: var(--color-text-muted);
+}
+:root[data-theme="dark"] :where(.workspace-nav, .workspace-main, .dashboard-card,
+  .login-panel, .setup-card, .studio-toolbox, .studio-properties, .quick-nav, .editor-box) {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+:root[data-theme="dark"] :where(.workspace-main, .workspace-nav, .quick-nav, .record-card,
+  .studio-toolbox, .studio-properties, .metric, .studio-collaboration) :where(h1, h2, h3, strong, label, p, small) {
+  color: inherit;
+}
+:root[data-theme="dark"] :where(.workspace-main, .workspace-nav, .quick-nav) :where(
+  .nav-item, .nav-group-trigger, .nav-group-label small, .record-meta, .hint, .section-lead,
+  .brand-name, .metric strong, .metric span) { color: var(--color-text); }
+:root[data-theme="dark"] :where(.dashboard-stats > div strong, .metric strong, .metric span,
+  .record-top strong, .list-head strong, .workspace-main h1, .workspace-main h2) {
+  color: var(--color-text-strong);
+}
+:root[data-theme="dark"] :where(.nav-item.selected, .grouped-nav .nav-item.selected,
+  .studio-tab-active, .v14-chat-people button.v14-selected) {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+:root[data-theme="dark"] :where(.studio-tool, .studio-layer, .v14-chat-people button,
+  .secondary-button, .studio-canvas-actions select) {
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+:root[data-theme="dark"] :where(.v14-table th, .monitor-traces th) {
+  background: var(--color-surface-muted); color: var(--color-text-strong);
+}
+:root[data-theme="dark"] :where(.v14-table td, .monitor-traces td, .monitor-traces th) {
+  border-color: var(--color-border); color: var(--color-text);
+}
+:root[data-theme="dark"] :where(.studio-canvas-scroll) {
+  background: repeating-conic-gradient(#40352f 0% 25%, #352b27 0% 50%) 50% / 20px 20px;
+}
+:root[data-theme="dark"] :where(.chat-bubble.user, .v14-message.own,
+  .v14-chat-people button.v14-selected) {
+  background: var(--color-accent-soft); color: var(--color-text-strong);
+}
+:root[data-theme="dark"] :where(.error-alert) {
+  background: var(--color-danger-surface); color: var(--color-danger-text);
+}
+:root[data-theme="dark"] :where(.success-alert) {
+  background: var(--color-success-surface); color: var(--color-success-text);
+}
+:root[data-theme="dark"] :where(.nav-group-items, .v14-chat-compose,
+  .studio-logic-area, .studio-share-panel, .record-inline, .monitor-traces table td) {
+  border-color: var(--color-border);
+}
+
+/* The account cards and blank states in the user's screenshot were too bright.
+   This applies at any screen size, independent of theme selection. */
+.dashboard-stats > div {
+  background: var(--color-surface-raised);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+.empty-state {
+  background: var(--color-surface-muted);
+  border-color: var(--color-border);
+  color: var(--color-text-muted);
+}
+:root[data-theme="dark"] :where(.status-tag, .monitor-chip.unconfigured, .monitor-chip.stale) {
+  background: var(--color-surface-muted);
+  color: var(--color-text-muted);
+}
+:root[data-theme="dark"] :where(.status-active, .status-approved, .status-published, .status-done, .status-normal,
+  .monitor-chip.healthy) { background: var(--color-success-surface); color: var(--color-success-text); }
+:root[data-theme="dark"] :where(.status-pending, .status-invited, .status-doing, .status-draft,
+  .monitor-chip.degraded) { background: var(--color-warning-surface); color: var(--color-warning-text); }
+:root[data-theme="dark"] :where(.status-suspended, .status-rejected, .status-attention, .status-cancelled,
+  .monitor-chip.down) { background: var(--color-danger-surface); color: var(--color-danger-text); }
+:root[data-theme="dark"] .v14-chat-people button.v14-selected {
+  background: var(--color-accent-soft) !important;
+  color: var(--color-text-strong) !important;
+}
+
+/* Never recolor user-created SVG artwork: the document needs WYSIWYG exports. */
+.studio-canvas { background: white; }
+.studio-functional-page { color-scheme: light; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation: none !important; }
+}

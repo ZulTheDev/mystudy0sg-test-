@@ -1,0 +1,7 @@
+# These functions validate the Study0SG portal JWT themselves via portal-auth.ts.
+# Disable gateway JWT preverification only with this fail-closed authentication in place.
+[functions.service-task-session]
+verify_jwt = false
+
+[functions.service-claim-review]
+verify_jwt = false
