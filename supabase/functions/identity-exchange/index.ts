@@ -20,23 +20,35 @@ if (Deno.env.get('PORTAL_ENVIRONMENT') === 'production') {
   }
 }
 
+// Exact browser-origin allowlist. An Origin never includes the GitHub Pages path.
+// PORTAL_ORIGIN is shared with other portal functions; extra allowed origins are
+// optional and must be configured explicitly on the trusted Edge Function server.
 const siteOrigin = env('PORTAL_ORIGIN');
+const extraOrigins = (Deno.env.get('PORTAL_ALLOWED_ORIGINS') ?? '')
+  .split(',').map((value) => value.trim()).filter(Boolean);
+const allowedOrigins = new Set([siteOrigin, ...extraOrigins]);
 const supabaseURL = env('SUPABASE_URL');
 const admin = createClient(supabaseURL, env('SUPABASE_SERVICE_ROLE_KEY'), {
   auth: { persistSession: false, autoRefreshToken: false },
 });
 
-// Allow requests from the one real portal origin only.
-function response(body: unknown, status = 200): Response {
+// Reflect only an explicitly allowlisted Origin, never an arbitrary browser origin.
+function response(req: Request, body: unknown, status = 200): Response {
+  const origin = req.headers.get('Origin') ?? '';
+  const corsHeaders: Record<string, string> = allowedOrigins.has(origin)
+    ? {
+        'Access-Control-Allow-Origin': origin,
+        'Access-Control-Allow-Headers': 'authorization, apikey, content-type',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      }
+    : {};
   return new Response(status === 204 ? null : JSON.stringify(body), {
     status,
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
       'Cache-Control': 'no-store',
       'Vary': 'Origin',
-      'Access-Control-Allow-Origin': siteOrigin,
-      'Access-Control-Allow-Headers': 'authorization, apikey, content-type',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      ...corsHeaders,
     },
   });
 }
@@ -84,23 +96,23 @@ async function verifyStytch(stytchJWT: string): Promise<SessionResponse | null> 
 // Only issue a token for a live, approved, identity-linked organizer.
 Deno.serve(async (req: Request): Promise<Response> => {
   if (req.method === 'OPTIONS') {
-    if (req.headers.get('Origin') !== siteOrigin) return response({ error: 'Forbidden' }, 403);
-    return response({}, 204);
+    if (!allowedOrigins.has(req.headers.get('Origin') ?? '')) return response(req, { error: 'Forbidden' }, 403);
+    return response(req, {}, 204);
   }
-  if (req.method !== 'POST' || req.headers.get('Origin') !== siteOrigin) {
-    return response({ error: 'Forbidden' }, 403);
+  if (req.method !== 'POST' || !allowedOrigins.has(req.headers.get('Origin') ?? '')) {
+    return response(req, { error: 'Forbidden' }, 403);
   }
 
   let diagnosticStage = 'request_validation';
   try {
     if (Number(req.headers.get('content-length') || 0) > 16_384) {
-      return response({ error: 'Invalid request' }, 413);
+      return response(req, { error: 'Invalid request' }, 413);
     }
     const input = await req.json() as { stytch_session_jwt?: unknown };
     if (typeof input.stytch_session_jwt !== 'string' ||
         input.stytch_session_jwt.length < 20 ||
         input.stytch_session_jwt.length > 10_000) {
-      return response({ error: 'Invalid request' }, 400);
+      return response(req, { error: 'Invalid request' }, 400);
     }
 
     diagnosticStage = 'stytch_session_verification';
@@ -109,7 +121,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     if (!session?.member_id || !session?.member_session_id ||
         session.organization_id !== env('STYTCH_ORGANIZATION_ID') ||
         !session.expires_at || Date.parse(session.expires_at) <= Date.now()) {
-      return response({ error: 'Session not authorised' }, 401);
+      return response(req, { error: 'Session not authorised' }, 401);
     }
 
     diagnosticStage = 'identity_digest';
@@ -123,7 +135,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
       .eq('provider', 'stytch')
       .eq('subject_digest', digest)
       .maybeSingle();
-    if (linkError || !link) return response({ error: 'Not enrolled' }, 403);
+    if (linkError || !link) return response(req, { error: 'Not enrolled' }, 403);
 
     diagnosticStage = 'organizer_lookup';
     const { data: organizer, error: organizerError } = await admin
@@ -133,7 +145,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
       .single();
     if (organizerError || !organizer || organizer.status !== 'active' ||
         organizer.lock_reason !== null) {
-      return response({ error: 'Access requires review' }, 403);
+      return response(req, { error: 'Access requires review' }, 403);
     }
 
     diagnosticStage = 'role_grants_lookup';
@@ -142,7 +154,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
       .select('role,department')
       .eq('organizer_id', organizer.id)
       .is('revoked_at', null);
-    if (grantsError || !grants?.length) return response({ error: 'No active assignment' }, 403);
+    if (grantsError || !grants?.length) return response(req, { error: 'No active assignment' }, 403);
 
     // For high-trust accounts require at least two independently verified factors.
     // Review Stytch's exact WebAuthn/user-verification semantics before allowing
@@ -153,7 +165,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     const verifiedMfa = factors.some((f) => f.type === 'totp') &&
       factors.some((f) => f.type !== 'totp');
     if (elevated && !verifiedMfa) {
-      return response({ error: 'Additional verification required' }, 403);
+      return response(req, { error: 'Additional verification required' }, 403);
     }
 
     diagnosticStage = 'jwt_key_loading';
@@ -245,13 +257,13 @@ Deno.serve(async (req: Request): Promise<Response> => {
       .setJti(crypto.randomUUID())
       .sign(key);
 
-    return response({
+    return response(req, {
       access_token: jwt, token_type: 'Bearer', expires_in: 300,
       organizer: { id: organizer.id, roles: grants.map(g => g.role), grants },
     });
   } catch (_error) {
     // Log only the failing step, never secrets, tokens, error objects, or user data.
     console.error(`[identity-exchange] Failed stage: ${diagnosticStage}`);
-    return response({ error: 'Authentication temporarily unavailable' }, 503);
+    return response(req, { error: 'Authentication temporarily unavailable' }, 503);
   }
 });
