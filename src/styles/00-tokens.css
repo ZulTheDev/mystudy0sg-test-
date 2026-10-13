@@ -1,0 +1,75 @@
+/* ==========================================================================
+   Study0SG Design Tokens — edit these values to change the whole portal.
+   Keep canvas artwork colors in design-studio files independent of the UI theme.
+   ========================================================================== */
+
+:root {
+  color-scheme: light;
+  font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  font-synthesis: none;
+
+  /* Foundation: light coffee */
+  --color-app: #fffaf5;
+  --color-surface: #fffdf9;
+  --color-surface-raised: #ffffff;
+  --color-surface-muted: #fff4e8;
+  --color-surface-inset: #f9ede1;
+  --color-accent-wash: #fff0de;
+  --color-text: #493428;
+  --color-text-strong: #3c2a22;
+  --color-text-muted: #705a4a;
+  --color-text-subtle: #796556;
+  --color-accent: #dd831f;
+  --color-accent-hover: #c26a12;
+  --color-accent-soft: #ffead3;
+  --color-accent-text: #94500c;
+  --color-on-accent: #2f1a0b;
+  --color-border: #e8d8c8;
+  --color-border-strong: #d8bfa8;
+  --color-focus: #a45613;
+  --color-shadow: rgb(64 35 19 / 12%);
+  --color-success-surface: #e9f5ea;
+  --color-success-text: #256136;
+  --color-warning-surface: #fff0d8;
+  --color-warning-text: #794900;
+  --color-danger-surface: #ffefea;
+  --color-danger-text: #923723;
+  --color-logic-event: #edc28e;
+  --color-logic-action: #cdb6e6;
+
+  background: var(--color-app);
+  color: var(--color-text);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Soft dark coffee — warm, not pitch black or cold navy */
+  --color-app: #211c1a;
+  --color-surface: #2d2522;
+  --color-surface-raised: #382d28;
+  --color-surface-muted: #3d312c;
+  --color-surface-inset: #261f1c;
+  --color-accent-wash: #3e2c21;
+  --color-text: #f4e9de;
+  --color-text-strong: #fff3e9;
+  --color-text-muted: #dfc9b8;
+  --color-text-subtle: #cdb5a3;
+  --color-accent: #f0ae78;
+  --color-accent-hover: #f6bc8b;
+  --color-accent-soft: #49362b;
+  --color-accent-text: #ffc38d;
+  --color-on-accent: #302016;
+  --color-border: #59483e;
+  --color-border-strong: #796052;
+  --color-focus: #ffc089;
+  --color-shadow: rgb(0 0 0 / 24%);
+  --color-success-surface: #264032;
+  --color-success-text: #b9ebc2;
+  --color-warning-surface: #4b3724;
+  --color-warning-text: #ffce90;
+  --color-danger-surface: #492e2b;
+  --color-danger-text: #ffc1b5;
+  --color-logic-event: #e4b985;
+  --color-logic-action: #c1a8df;
+}

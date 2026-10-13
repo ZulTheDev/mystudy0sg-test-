@@ -1,0 +1,35 @@
+# Study0SG: never publish local credentials, data or private identities.
+node_modules/
+dist/
+.env
+.env.*
+.env.example
+.env.staging.example
+.env.production.example
+.DS_Store
+*.log
+*.backup
+*.dump
+*.sql.backup
+*.pem
+*.key
+*.p12
+*.pfx
+*.credentials.json
+*service-account*.json
+*refresh-token*
+*private*jwk*.json
+supabase/signing_keys.json
+supabase/functions/.env
+.env.runtime
+Study0SG-Backups/
+# No actual organizer data or private setup records in a public Git repo.
+MY_STUDY0SG_PORTAL_ARCHITECTURE.md
+STUDY0SG_IDENTITY_GOOGLE_VIA_ADDENDUM.md
+FRONTEND_FIX_REPORT.md
+START_HERE.md
+config/stytch-organization.json
+config/member-example.json
+scripts/bootstrap-fore-director.sql
+scripts/bootstrap-member-template.sql
+*.md

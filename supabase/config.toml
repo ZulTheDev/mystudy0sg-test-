@@ -1,0 +1,43 @@
+# Stytch tokens are not Supabase Auth tokens; validate in the function body.
+[functions.identity-exchange]
+verify_jwt = false
+
+# Functions receiving externally minted JWTs must verify issuer, signature,
+# audience, expiry and live organizer status inside their handlers.
+[functions.public-apply]
+verify_jwt = false
+
+[functions.media-presign]
+verify_jwt = false
+
+# These functions validate the portal JWT internally.
+[functions.knowledge-chat]
+verify_jwt = false
+
+[functions.knowledge-ingest]
+verify_jwt = false
+
+[functions.service-task-session]
+verify_jwt = false
+
+[functions.service-claim-review]
+verify_jwt = false
+
+# Only the verified cron secret or an authorized portal JWT can trigger scans.
+[functions.monitor-run]
+verify_jwt = false
+
+[functions.package-audit]
+verify_jwt = false # The handler verifies the short-lived ES256 organizer token itself.
+
+[functions.buffer-bridge]
+verify_jwt = false # Authenticated inside handler against ES256 Stytch-linked organizer portal JWT.
+
+[functions.ai-workspace]
+verify_jwt = false # Handler verifies ES256 portal JWT, organizer status, grants and quotas.
+
+[functions.via-letter]
+verify_jwt = false # Handler checks signed organizer JWT; DB caps AI draft uses.
+
+[functions.media-generate]
+verify_jwt = false # Internal portal JWT is verified by authenticate()

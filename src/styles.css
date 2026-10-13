@@ -1,0 +1,15 @@
+/* Study0SG styles entrypoint. Change colors in 00-tokens.css.
+   Theme finishing sets surfaces, then mobile-announcements adjusts responsive layout. */
+@import "tailwindcss";
+@import "./styles/00-tokens.css";
+@import "./styles/01-base.css";
+@import "./styles/02-navigation.css";
+@import "./styles/03-components.css";
+@import "./styles/04-monitoring.css";
+@import "./styles/05-operations.css";
+@import "./styles/06-design-studios.css";
+@import "./styles/07-collaboration.css";
+@import "./styles/08-theme-finishing.css";
+@import "./styles/09-mobile-announcements.css";
+@import "./styles/10-brand-logo.css";
+@import "./styles/11-v2-workspaces.css";

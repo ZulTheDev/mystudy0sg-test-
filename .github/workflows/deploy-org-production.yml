@@ -1,0 +1,56 @@
+# Standalone production organizer repository must contain package.json at root.
+# The host path /My-Study0SG/ requires that GitHub Pages project path match EXACTLY.
+name: Study0SG | Deploy Org Production
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: study0sg-org-prod-pages
+  cancel-in-progress: false
+jobs:
+  build-org-production:
+    runs-on: ubuntu-latest
+    environment: org-production
+    # REVIEW: change this if your actual production repository slug differs.
+    if: github.repository == 'study0SG/My-Study0SG'
+    env:
+      VITE_DEPLOYMENT_STAGE: production
+      VITE_BASE_PATH: /My-Study0SG/
+      VITE_STYTCH_PUBLIC_TOKEN: ${{ secrets.VITE_STYTCH_PUBLIC_TOKEN }}
+      VITE_STYTCH_ORGANIZATION_ID: ${{ secrets.VITE_STYTCH_ORGANIZATION_ID }}
+      VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify repository root layout
+        run: test -f package.json && test -f package-lock.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci --include=optional
+      - run: node scripts/release-preflight.mjs production
+      - run: npm run typecheck
+      - run: npm run check:nav
+      - run: npm run test:studios
+      - run: npm run test:security
+      - run: npm run test:mobile
+      - run: npm run build
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+  publish-org-production:
+    needs: build-org-production
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

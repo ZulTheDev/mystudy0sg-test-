@@ -1,0 +1,86 @@
+{
+  "$schema_note": "Frontend DISPLAY definitions only. Actual database access is enforced by Supabase RLS and audited Edge Functions.",
+  "base": [
+    "dashboard",
+    "announcements",
+    "my_tasks",
+    "my_hours",
+    "onboarding",
+    "my_profile",
+    "organizer_chat",
+    "learning"
+  ],
+  "modules": {
+    "dashboard": "Overview",
+    "announcements": "Announcements",
+    "my_tasks": "My tasks",
+    "my_hours": "My VIA & contributions",
+    "onboarding": "My training",
+    "my_profile": "My profile",
+    "people_ops": "People & applications",
+    "departments": "Department oversight",
+    "support_queue": "Support Pool queue",
+    "community": "Community & events",
+    "media": "Media studio",
+    "security": "Tech & Security",
+    "educator": "Educator Circle",
+    "rag": "AI knowledge assistant",
+    "approval_center": "Approvals & offboarding",
+    "media_forms": "Media \u00b7 Registration Forms",
+    "media_edm": "Media \u00b7 EDM Studio",
+    "community_handoffs": "Community \u00b7 Registration Handoffs",
+    "organizer_chat": "Organizer Chat",
+    "learning": "Courses & SOPs",
+    "security_supply_chain": "Tech \u00b7 Software Safety Check",
+    "tech_studio": "Tech \u00b7 App Design Studio",
+    "growth": "Growth & Partnerships",
+    "security_studio": "Tech \u00b7 Security Architecture Studio",
+    "security_tools": "Tech \u00b7 Defensive Tool Lab",
+    "security_accounts": "Tech \u00b7 Account Security Journal",
+    "social_media": "Media \u00b7 Social Publishing"
+  },
+  "roles": {
+    "fore_director": [
+      "*"
+    ],
+    "director": [
+      "departments",
+      "rag",
+      "approval_center"
+    ],
+    "support_pool": [
+      "support_queue",
+      "rag"
+    ],
+    "community_crew": [
+      "community",
+      "rag",
+      "community_handoffs"
+    ],
+    "media_crew": [
+      "media",
+      "rag",
+      "media_forms",
+      "media_edm",
+      "social_media"
+    ],
+    "tech_security": [
+      "security",
+      "rag",
+      "security_supply_chain",
+      "security_studio",
+      "security_tools",
+      "security_accounts"
+    ],
+    "educator_circle": [
+      "educator",
+      "rag"
+    ]
+  },
+  "notes": {
+    "director": "Directors see scoped task, event and approval modules for their live grant departments. People management remains Fore Director only.",
+    "support_pool": "Dynamic department work requires a separate approved grant or task assignment. No implicit admin role.",
+    "fore_director": "All app navigation, never raw signing secrets, database credentials, or unapproved student records.",
+    "approval_center": "Fore Directors may manage resignations; Directors can review scoped volunteer applications."
+  }
+}

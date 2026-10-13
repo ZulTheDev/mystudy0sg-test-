@@ -1,0 +1,32 @@
+name: Verify Study0SG Build
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install all platform-required packages
+        run: npm ci --include=optional
+      - name: Check menu structure
+        run: npm run check:nav
+      - name: Test visual studios
+        run: npm run test:studios
+      - name: Test defensive rules and permission invariants
+        run: npm run test:security
+      - name: Check TypeScript and bundle frontend
+        run: npm run build
