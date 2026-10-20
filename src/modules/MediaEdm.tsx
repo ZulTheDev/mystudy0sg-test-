@@ -12,6 +12,7 @@ import {useStudioCollaboration,CollaborationPanel} from '../studio/Collaboration
 type StudioRow={id:string;title:string;kind:string;body:unknown;updated_at:string;revision?:number};
 const posterElements:NodeKind[]=['heading','text','button','badge','rectangle','circle','sticker','image','card'];
 export function MediaEdm(){
+ const [toolOpen,setToolOpen]=useState(false);
  const stored=useRecords<StudioRow>('v14_studio_documents','id,title,kind,body,updated_at,revision'),action=useNotice();
  const {doc,edit,record,reset,undo,redo}=useStudioDocument(starterPoster);
  const [title,setTitle]=useState('Study0SG Event Poster'),[selection,setSelection]=useState<string|null>(null),[error,setError]=useState('');
