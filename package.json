@@ -1,9 +1,9 @@
 {
   "name": "my-study0sg-organizer-portal",
   "private": true,
-  "version": "1.7.0",
+  "version": "2.3.0-beta.1",
   "type": "module",
-  "description": "Study0SG organizer portal: mobile navigation and secure team announcements",
+  "description": "Study0SG personal and shared AI workspaces, Fabric studios and Yjs collaboration",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "tsc --noEmit && vite build",
@@ -27,6 +27,7 @@
     "@tanstack/react-query": "^5.104.0",
     "@tanstack/react-table": "^9.2.6",
     "date-fns": "^4.4.0",
+    "fabric": "7.4.0",
     "lucide-react": "^1.52.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
@@ -36,6 +37,7 @@
     "react-router": "^7.18.4",
     "recharts": "^3.10.1",
     "remark-gfm": "^4.0.1",
+    "yjs": "13.6.33",
     "zod": "^4.1.12"
   },
   "devDependencies": {

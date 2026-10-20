@@ -217,7 +217,7 @@ function Dashboard(){
    case 'support_queue':return <Tasks {...common}/>;
    case 'community':case 'media':case 'educator':return <><h2>Department tasks</h2><Tasks {...common} department={dept}/><h2>Department events</h2><Events grants={access.grants} department={dept}/></>;
    case 'security':return <><SecurityObservatory/><h2>Tech & Security work</h2><Tasks {...common} department="technology"/><h2>Security event history</h2><SecurityLogs/></>;
-   case 'rag':return <Knowledge isFore={isFore}/>;
+   case 'rag':return <Knowledge actorId={access.id} isFore={isFore} grants={access.grants}/>;
    default:return <p>This section is being prepared.</p>;
   }
  })();

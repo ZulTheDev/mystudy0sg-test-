@@ -3,17 +3,21 @@ import {mutation} from '../portal-data';
 import {downloadText} from '../v14-utils';
 import {useRecords,useNotice,Notices,Field} from './common';
 import {defaultNode,PALETTE,normalizeDocument,starterPoster,type CanvasNode,type NodeKind} from '../studio/model';
-import {StudioCanvas,PropertiesPanel} from '../studio/StudioCanvas';
+import {PropertiesPanel} from '../studio/StudioCanvas';
+import {FabricStudioCanvas as StudioCanvas} from '../studio/FabricStudioCanvas';
+import {useLiveStudio} from '../studio/useLiveStudio';
 import {useStudioDocument} from '../studio/useStudioDocument';
 import {exportPNG,exportSVG} from '../studio/exporters';
 import {useStudioCollaboration,CollaborationPanel} from '../studio/CollaborationPanel';
 type StudioRow={id:string;title:string;kind:string;body:unknown;updated_at:string;revision?:number};
 const posterElements:NodeKind[]=['heading','text','button','badge','rectangle','circle','sticker','image','card'];
 export function MediaEdm(){
+ const [toolOpen,setToolOpen]=useState(false);
  const stored=useRecords<StudioRow>('v14_studio_documents','id,title,kind,body,updated_at,revision'),action=useNotice();
  const {doc,edit,record,reset,undo,redo}=useStudioDocument(starterPoster);
  const [title,setTitle]=useState('Study0SG Event Poster'),[selection,setSelection]=useState<string|null>(null),[error,setError]=useState('');
  const collab=useStudioCollaboration('edm',doc,title,reset,setTitle,stored.refresh,(x)=>normalizeDocument(x,'poster'));
+ const liveStatus=useLiveStudio(collab.id,doc,reset);
  const current=useMemo(()=>doc.nodes.find(n=>n.id===selection)??null,[doc.nodes,selection]);
  const add=(kind:NodeKind)=>{const node=defaultNode(kind,doc.nodes.length,'poster');edit(d=>({...d,nodes:[...d.nodes,node]}));setSelection(node.id);};
  const change=(patch:Partial<CanvasNode>)=>edit(d=>({...d,nodes:d.nodes.map(n=>n.id===selection?{...n,...patch}:n)}));
@@ -37,11 +41,10 @@ export function MediaEdm(){
   <Notices loading={stored.loading} error={stored.error||collab.error||action.error||error} success={action.notice}/>
   <div className="studio-header-fields"><Field label="Poster name"><input value={title} maxLength={150} onChange={e=>setTitle(e.target.value)}/></Field><Field label="Background color"><input type="color" value={doc.canvas.background} onChange={e=>edit(d=>({...d,canvas:{...d.canvas,background:e.target.value}}))}/></Field></div>
   <div className="studio-tabs"><button type="button" className="secondary-button" onClick={undo}>↶ Undo</button><button type="button" className="secondary-button" onClick={redo}>↷ Redo</button><span className="hint">Click an object to edit. Drag it to move; drag the orange corner to resize.</span></div>
-  <div className="studio-workbench"><aside className="studio-toolbox"><h3>Poster elements</h3><div className="studio-tool-list">{posterElements.map(k=><button key={k} type="button" className="studio-tool" disabled={doc.nodes.length>=100} onClick={()=>add(k)}><strong>+ {PALETTE[k].title}</strong><small>{PALETTE[k].hint}</small></button>)}</div><h3>Layer order</h3><div className="studio-layers">{[...doc.nodes].reverse().map(n=><button key={n.id} type="button" aria-pressed={selection===n.id} className={selection===n.id?'studio-layer selected':'studio-layer'} onClick={()=>setSelection(n.id)}>{n.kind} · {(n.text||'shape').slice(0,16)}</button>)}</div></aside>
+  <div className="studio-floating-actions"><span className="hint" aria-live="polite">Live co-editing: {liveStatus}</span><button className="secondary-button" type="button" onClick={()=>setToolOpen(x=>!x)} aria-expanded={toolOpen}>☷ {toolOpen?"Hide tools":"Open elements"}</button><button type="button" className="secondary-button" onClick={save} disabled={collab.busy}>Save design</button><details className="studio-team-popover"><summary>↗ Share & collaborate</summary><CollaborationPanel {...collab} save={save}/></details></div><div className="studio-workbench"><aside className={toolOpen?"studio-toolbox fabric-tools-open":"studio-toolbox fabric-tools-closed"}><h3>Poster elements</h3><div className="studio-tool-list">{posterElements.map(k=><button key={k} type="button" className="studio-tool" disabled={doc.nodes.length>=100} onClick={()=>add(k)}><strong>+ {PALETTE[k].title}</strong><small>{PALETTE[k].hint}</small></button>)}</div><h3>Layer order</h3><div className="studio-layers">{[...doc.nodes].reverse().map(n=><button key={n.id} type="button" aria-pressed={selection===n.id} className={selection===n.id?'studio-layer selected':'studio-layer'} onClick={()=>setSelection(n.id)}>{n.kind} · {(n.text||'shape').slice(0,16)}</button>)}</div></aside>
    <div className="studio-stage"><StudioCanvas doc={doc} edit={edit} record={record} selection={selection} setSelection={setSelection} mode="poster"/></div>
-   <PropertiesPanel node={current} edit={change} remove={remove} raise={()=>layer(1)} lower={()=>layer(-1)} mode="poster" addImage={addImage}/>
+   {current&&<PropertiesPanel node={current} edit={change} remove={remove} raise={()=>layer(1)} lower={()=>layer(-1)} mode="poster" addImage={addImage}/>}
   </div>
-  <CollaborationPanel {...collab} save={save}/>
   <h3>Save and export poster</h3><div className="record-actions"><button type="button" disabled={!title.trim()||collab.busy} onClick={save}>Save layout</button><button type="button" className="secondary-button" onClick={()=>exportSVG(doc,'Study0SG-EDM.svg')}>Download SVG</button><button type="button" className="secondary-button" onClick={()=>{setError('');void exportPNG(doc).catch(e=>setError(e instanceof Error?e.message:'PNG export failed'));}}>Download PNG (2×)</button><button type="button" className="secondary-button" onClick={backup}>Download editable JSON</button><button type="button" className="secondary-button" onClick={publishRequest}>Export publishing review request</button></div>
   <label className="studio-file-import">Import editable poster JSON <input type="file" accept="application/json,.json" onChange={e=>{const f=e.target.files?.[0];if(f)void importJSON(f);e.currentTarget.value='';}}/></label>
   <p className="muted-note">Uploaded images are stored only in this browser session and included in SVG/PNG/JSON exports. Due to the existing 50 KB database document limit, they are <strong>not saved in Supabase</strong>. Back up your editable JSON or export the artwork before leaving. Do not add participant PII to posters.</p>
