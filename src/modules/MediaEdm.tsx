@@ -5,6 +5,7 @@ import {useRecords,useNotice,Notices,Field} from './common';
 import {defaultNode,PALETTE,normalizeDocument,starterPoster,type CanvasNode,type NodeKind} from '../studio/model';
 import {PropertiesPanel} from '../studio/StudioCanvas';
 import {FabricStudioCanvas as StudioCanvas} from '../studio/FabricStudioCanvas';
+import {useLiveStudio} from '../studio/useLiveStudio';
 import {useStudioDocument} from '../studio/useStudioDocument';
 import {exportPNG,exportSVG} from '../studio/exporters';
 import {useStudioCollaboration,CollaborationPanel} from '../studio/CollaborationPanel';
@@ -15,6 +16,7 @@ export function MediaEdm(){
  const {doc,edit,record,reset,undo,redo}=useStudioDocument(starterPoster);
  const [title,setTitle]=useState('Study0SG Event Poster'),[selection,setSelection]=useState<string|null>(null),[error,setError]=useState('');
  const collab=useStudioCollaboration('edm',doc,title,reset,setTitle,stored.refresh,(x)=>normalizeDocument(x,'poster'));
+ const liveStatus=useLiveStudio(collab.id,doc,reset);
  const current=useMemo(()=>doc.nodes.find(n=>n.id===selection)??null,[doc.nodes,selection]);
  const add=(kind:NodeKind)=>{const node=defaultNode(kind,doc.nodes.length,'poster');edit(d=>({...d,nodes:[...d.nodes,node]}));setSelection(node.id);};
  const change=(patch:Partial<CanvasNode>)=>edit(d=>({...d,nodes:d.nodes.map(n=>n.id===selection?{...n,...patch}:n)}));
@@ -38,7 +40,7 @@ export function MediaEdm(){
   <Notices loading={stored.loading} error={stored.error||collab.error||action.error||error} success={action.notice}/>
   <div className="studio-header-fields"><Field label="Poster name"><input value={title} maxLength={150} onChange={e=>setTitle(e.target.value)}/></Field><Field label="Background color"><input type="color" value={doc.canvas.background} onChange={e=>edit(d=>({...d,canvas:{...d.canvas,background:e.target.value}}))}/></Field></div>
   <div className="studio-tabs"><button type="button" className="secondary-button" onClick={undo}>↶ Undo</button><button type="button" className="secondary-button" onClick={redo}>↷ Redo</button><span className="hint">Click an object to edit. Drag it to move; drag the orange corner to resize.</span></div>
-  <div className="studio-floating-actions"><button className="secondary-button" type="button" onClick={()=>setToolOpen(x=>!x)} aria-expanded={toolOpen}>☷ {toolOpen?"Hide tools":"Open elements"}</button><button type="button" className="secondary-button" onClick={save} disabled={collab.busy}>Save design</button><details className="studio-team-popover"><summary>↗ Share & collaborate</summary><CollaborationPanel {...collab} save={save}/></details></div><div className="studio-workbench"><aside className={toolOpen?"studio-toolbox fabric-tools-open":"studio-toolbox fabric-tools-closed"}><h3>Poster elements</h3><div className="studio-tool-list">{posterElements.map(k=><button key={k} type="button" className="studio-tool" disabled={doc.nodes.length>=100} onClick={()=>add(k)}><strong>+ {PALETTE[k].title}</strong><small>{PALETTE[k].hint}</small></button>)}</div><h3>Layer order</h3><div className="studio-layers">{[...doc.nodes].reverse().map(n=><button key={n.id} type="button" aria-pressed={selection===n.id} className={selection===n.id?'studio-layer selected':'studio-layer'} onClick={()=>setSelection(n.id)}>{n.kind} · {(n.text||'shape').slice(0,16)}</button>)}</div></aside>
+  <div className="studio-floating-actions"><span className="hint" aria-live="polite">Live co-editing: {liveStatus}</span><button className="secondary-button" type="button" onClick={()=>setToolOpen(x=>!x)} aria-expanded={toolOpen}>☷ {toolOpen?"Hide tools":"Open elements"}</button><button type="button" className="secondary-button" onClick={save} disabled={collab.busy}>Save design</button><details className="studio-team-popover"><summary>↗ Share & collaborate</summary><CollaborationPanel {...collab} save={save}/></details></div><div className="studio-workbench"><aside className={toolOpen?"studio-toolbox fabric-tools-open":"studio-toolbox fabric-tools-closed"}><h3>Poster elements</h3><div className="studio-tool-list">{posterElements.map(k=><button key={k} type="button" className="studio-tool" disabled={doc.nodes.length>=100} onClick={()=>add(k)}><strong>+ {PALETTE[k].title}</strong><small>{PALETTE[k].hint}</small></button>)}</div><h3>Layer order</h3><div className="studio-layers">{[...doc.nodes].reverse().map(n=><button key={n.id} type="button" aria-pressed={selection===n.id} className={selection===n.id?'studio-layer selected':'studio-layer'} onClick={()=>setSelection(n.id)}>{n.kind} · {(n.text||'shape').slice(0,16)}</button>)}</div></aside>
    <div className="studio-stage"><StudioCanvas doc={doc} edit={edit} record={record} selection={selection} setSelection={setSelection} mode="poster"/></div>
    {current&&<PropertiesPanel node={current} edit={change} remove={remove} raise={()=>layer(1)} lower={()=>layer(-1)} mode="poster" addImage={addImage}/>}
   </div>
