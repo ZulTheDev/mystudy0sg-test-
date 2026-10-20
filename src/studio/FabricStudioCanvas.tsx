@@ -58,8 +58,8 @@ export function FabricStudioCanvas({doc,edit,record,selection,setSelection,mode,
     object=new Rect({left:n.x,top:n.y,width:n.w,height:n.h,fill:n.fill,rx:n.radius,ry:n.radius,opacity:n.opacity}) as Named;
    }else{
     const label=new Textbox(n.text,{left:0,top:0,width:Math.max(24,n.w-12),fontFamily:'Arial',fontSize:n.fontSize,fill:n.color,splitByGrapheme:false});
-    if(['card','badge','button','input'].includes(n.kind)){
-     const bg=new Rect({left:0,top:0,width:n.w,height:n.h,fill:n.fill,rx:n.radius,ry:n.radius});
+    if(['frame','card','badge','button','input'].includes(n.kind)){
+     const bg=new Rect({left:0,top:0,width:n.w,height:n.h,fill:n.fill,rx:n.radius,ry:n.radius,stroke:n.kind==='frame'?'#ff951c':undefined,strokeWidth:n.kind==='frame'?2:0});
      label.set({left:Math.min(12,n.w/8),top:Math.min(12,n.h/8)});
      object=new Group([bg,label],{left:n.x,top:n.y,opacity:n.opacity}) as Named;
     }else {label.set({left:n.x,top:n.y,opacity:n.opacity});object=label as Named;}
