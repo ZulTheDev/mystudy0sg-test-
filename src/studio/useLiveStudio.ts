@@ -50,7 +50,7 @@ export function useLiveStudio(id:string|null,doc:StudioDocument,reset:(d:StudioD
     };
     remoteHash.current=JSON.stringify(changed);
     resetRef.current(changed);
-   }else if(origin!=='seed'&&status!=='offline'){
+   }else if(origin!=='seed'){
     const packet=encode(update);
     if(packet.length<100000)void channel.send({type:'broadcast',event:'sync',payload:{update:packet}});
    }
