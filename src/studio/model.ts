@@ -1,5 +1,5 @@
 /** Study0SG design data has no executable JavaScript, HTML, or private participant records. */
-export type NodeKind = 'heading'|'text'|'button'|'input'|'card'|'table'|'image'|'rectangle'|'circle'|'sticker'|'link'|'badge';
+export type NodeKind = 'heading'|'text'|'button'|'input'|'card'|'table'|'image'|'rectangle'|'circle'|'sticker'|'link'|'badge'|'frame';
 export type CanvasNode = {
  id:string; kind:NodeKind; x:number;y:number;w:number;h:number; text:string;
  fill:string; color:string; fontSize:number; radius:number; opacity:number;
@@ -11,6 +11,7 @@ export type LogicRule = {id:string;event:LogicEvent;sourceId:string; action:Logi
 export type StudioDocument = {connections?:Array<{from:string;to:string;label:string}>;version:2; canvas:{width:number;height:number;background:string}; nodes:CanvasNode[]; logic:LogicRule[]; services:string[]; explanation:string};
 export const newId=()=>crypto.randomUUID();
 export const PALETTE:Record<NodeKind,{title:string;hint:string;initial:string}>={
+ frame:{title:'Frame',hint:'Resizable viewport frame',initial:'Mobile frame'},
  heading:{title:'Heading',hint:'Big page title',initial:'Welcome to Study0SG'},
  text:{title:'Text',hint:'Paragraph or caption',initial:'Learn together, grow together.'},
  button:{title:'Button',hint:'An interactive action',initial:'Register interest'},
@@ -29,9 +30,9 @@ export const isColor=(value:string)=>/^#[0-9a-fA-F]{6}$/.test(value);
 export function defaultNode(kind:NodeKind, count:number, mode:'wireframe'|'poster'):CanvasNode{
  const x=30+(count%5)*25,y=35+(count%6)*30;
  const isPoster=mode==='poster';
- const sizes:Partial<Record<NodeKind,[number,number]>>={heading:[isPoster?590:440,86],text:[isPoster?480:400,92],button:[240,66],input:[270,56],card:[300,138],table:[340,155],image:[270,200],rectangle:[220,150],circle:[130,130],sticker:[95,95],link:[220,48],badge:[190,52]};
+ const sizes:Partial<Record<NodeKind,[number,number]>>={frame:[390,600],heading:[isPoster?590:440,86],text:[isPoster?480:400,92],button:[240,66],input:[270,56],card:[300,138],table:[340,155],image:[270,200],rectangle:[220,150],circle:[130,130],sticker:[95,95],link:[220,48],badge:[190,52]};
  const [w,h]=sizes[kind]||[250,80];
- return {id:newId(),kind,x,y,w,h,text:PALETTE[kind].initial,fill:kind==='rectangle'?'#FFDBC4':kind==='circle'?'#F4B76B':kind==='button'?'#F28C28':kind==='card'?'#FFFDF8':kind==='badge'?'#FFDFBC':'#FFFFFF',color:'#553727',fontSize:kind==='heading'?(isPoster?52:40):kind==='sticker'?72:kind==='text'?22:22,radius:kind==='circle'?999:14,opacity:1};
+ return {id:newId(),kind,x,y,w,h,text:PALETTE[kind].initial,fill:kind==='frame'?'#FFFDF8':kind==='rectangle'?'#FFDBC4':kind==='circle'?'#F4B76B':kind==='button'?'#F28C28':kind==='card'?'#FFFDF8':kind==='badge'?'#FFDFBC':'#FFFFFF',color:'#553727',fontSize:kind==='heading'?(isPoster?52:40):kind==='sticker'?72:kind==='text'?22:22,radius:kind==='circle'?999:14,opacity:1};
 }
 export const starterWireframe=():StudioDocument=>({version:2,canvas:{width:960,height:600,background:'#fff9f0'},nodes:[
  {...defaultNode('heading',0,'wireframe'),x:80,y:70,text:'Welcome to Study0SG'},
@@ -65,7 +66,7 @@ export function normalizeDocument(raw:unknown,mode:'wireframe'|'poster'):StudioD
    return {...starter,id:typeof r.id==='string'&&r.id.length<100?r.id:newId(),x:num('x',0),y:num('y',0),w:clamp(num('w',220),24,1800),h:clamp(num('h',90),24,1800),text:String(r.text??'').slice(0,800),fill:isColor(String(r.fill))?String(r.fill):starter.fill,color:isColor(String(r.color))?String(r.color):starter.color,fontSize:clamp(num('fontSize',22),10,110),opacity:clamp(num('opacity',1),0.1,1),radius:clamp(num('radius',12),0,100),src:typeof r.src==='string'&&/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(r.src)&&r.src.length<700000?r.src:undefined};
   };
   const seen=new Set<string>();
-  const width=mode==='poster'?700:960,height=mode==='poster'?700:600;
+  const width=clamp(typeof c.width==='number'&&Number.isFinite(c.width)?c.width:(mode==='poster'?700:960),320,2400),height=clamp(typeof c.height==='number'&&Number.isFinite(c.height)?c.height:(mode==='poster'?700:600),320,2400);
   const nodes=body.nodes.slice(0,160).map(safeNode).filter((n):n is CanvasNode=>n!==null).map(n=>{
    const id=seen.has(n.id)?newId():n.id;seen.add(id);
    const w=clamp(n.w,24,width),h=clamp(n.h,24,height);
