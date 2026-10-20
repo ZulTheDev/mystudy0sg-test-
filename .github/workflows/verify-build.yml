@@ -28,5 +28,7 @@ jobs:
         run: npm run test:studios
       - name: Test defensive rules and permission invariants
         run: npm run test:security
+      - name: Check immersive studios and AI navigation
+        run: npm run test:immersive
       - name: Check TypeScript and bundle frontend
         run: npm run build

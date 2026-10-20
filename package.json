@@ -13,7 +13,8 @@
     "test:studios": "node scripts/test-studios.mjs",
     "test:security": "node scripts/test-security.mjs",
     "check:staged": "node scripts/check-staged.mjs",
-    "test:mobile": "node scripts/test-mobile.mjs"
+    "test:mobile": "node scripts/test-mobile.mjs",
+    "test:immersive": "node scripts/test-immersive-layout.mjs"
   },
   "engines": {
     "node": ">=22.12.0",

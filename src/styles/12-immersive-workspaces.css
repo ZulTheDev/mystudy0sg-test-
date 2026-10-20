@@ -1,0 +1,69 @@
+/* Study0SG v2.3.1: explicit immersive layout, rather than relying on :has(). */
+.dashboard-page--studio { padding: 8px 14px 18px; }
+.dashboard-page--studio .dashboard-header {max-width:none; margin:0 auto; padding:3px 8px; min-height:56px}
+.dashboard-page--studio .workspace-layout--studio {
+  display:block; max-width:none; margin:4px auto; width:100%; min-width:0;
+}
+.workspace-layout--studio > .workspace-nav:not(.mobile-open),
+.workspace-layout--ai > .workspace-nav:not(.mobile-open) {display:none!important}
+.workspace-layout--studio > .workspace-main {
+  width:100%; max-width:none; border:0; border-radius:12px;
+  padding:4px 8px 12px; min-width:0; background:transparent;
+}
+.workspace-layout--ai {display:block; max-width:1480px; margin:14px auto}
+.workspace-layout--ai > .workspace-main {min-width:0;padding:16px}
+.workspace-main--studio > .workspace-title--studio {display:flex;align-items:center;justify-content:space-between;margin:0 4px 3px}
+.workspace-title--studio h1 {font-size:clamp(15px,1.3vw,20px);margin:0;color:var(--color-text-strong)}
+.studio-module .studio-short-hint {margin:0 4px 8px!important;font-size:12px;line-height:1.4;color:var(--color-text-muted)}
+.studio-module .studio-settings-drawer {margin:0 0 7px;max-width:100%;font-size:12px}
+.studio-module .studio-settings-drawer > summary {display:inline-block;cursor:pointer;background:var(--color-surface-muted);border:1px solid var(--color-border);border-radius:9px;padding:6px 10px}
+.studio-module .studio-header-fields {margin:7px 0;max-width:820px}
+.studio-module .studio-tabs--compact {margin:4px auto 6px;justify-content:center}
+.studio-module .studio-floating-actions {
+  display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:6px;
+  margin:2px auto 7px;position:relative;z-index:9;padding:4px 8px;
+}
+.studio-module .studio-floating-actions button {font-size:12px;padding:6px 10px}
+.studio-module .studio-workbench {
+  width:100%;height:calc(100dvh - 208px);min-height:370px;max-height:94dvh;
+  resize:vertical;overflow:hidden;display:block;position:relative;
+  padding:0;border-radius:14px;
+}
+.studio-module--wireframe .studio-workbench {height:calc(100dvh - 258px)}
+.studio-module .studio-stage {width:100%;height:100%;min-height:0;min-width:0}
+.studio-module .fabric-workspace {
+  width:100%;height:100%;min-height:0;max-height:none;
+  border-radius:14px;min-width:0;
+}
+.studio-module .fabric-scroll {
+  flex:1;overflow:auto;min-height:0;max-height:none;
+  display:flex;align-items:flex-start;justify-content:flex-start;
+}
+.studio-module .fabric-board {margin:auto;flex-shrink:0}
+.studio-module .studio-toolbox.fabric-tools-open {
+  top:auto;bottom:18px;left:50%;transform:translateX(-50%);
+  position:absolute;display:block;width:min(490px,calc(100% - 32px));
+  max-height:min(55dvh,410px);overflow:auto;z-index:12;
+  background:var(--color-surface-raised);box-shadow:0 12px 38px #21190b55;
+}
+.studio-module .studio-tool-list {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.studio-module .studio-layers {max-height:100px;overflow:auto}
+.studio-module .studio-properties {
+  position:absolute;right:12px;top:12px;z-index:11;width:min(290px,calc(100% - 24px));
+  max-height:65%;overflow:auto;background:var(--color-surface-raised);
+}
+.studio-module .studio-below-canvas {margin:12px 0 4px}
+.studio-module .studio-below-canvas>summary {cursor:pointer;font-size:12px;color:var(--color-accent-text)}
+.studio-module .studio-file-import {margin:10px 0}
+.dashboard-page--ai .ai-v23-body {min-height:calc(100dvh - 235px)}
+.dashboard-page--ai .ai-v23-messages {max-height:calc(100dvh - 380px)}
+@media(max-width:800px) {
+  .dashboard-page--studio {padding:6px}
+  .workspace-layout--studio>.workspace-main {padding:2px}
+  .studio-module .studio-workbench {height:calc(100dvh - 170px);min-height:420px}
+  .studio-module .studio-toolbox.fabric-tools-open {bottom:7px}
+  .studio-module .fabric-scroll {padding:18px}
+  .workspace-layout--studio>.workspace-nav.mobile-open,
+  .workspace-layout--ai>.workspace-nav.mobile-open {display:flex!important}
+  .workspace-layout--ai>.workspace-main {padding:8px}
+}

@@ -8,7 +8,8 @@
     "onboarding",
     "my_profile",
     "organizer_chat",
-    "learning"
+    "learning",
+    "rag"
   ],
   "modules": {
     "dashboard": "Overview",
@@ -24,20 +25,20 @@
     "media": "Media studio",
     "security": "Tech & Security",
     "educator": "Educator Circle",
-    "rag": "AI knowledge assistant",
+    "rag": "AI Workspace · Personal & Projects",
     "approval_center": "Approvals & offboarding",
-    "media_forms": "Media \u00b7 Registration Forms",
-    "media_edm": "Media \u00b7 EDM Studio",
-    "community_handoffs": "Community \u00b7 Registration Handoffs",
+    "media_forms": "Media · Registration Forms",
+    "media_edm": "Media · EDM Studio",
+    "community_handoffs": "Community · Registration Handoffs",
     "organizer_chat": "Organizer Chat",
     "learning": "Courses & SOPs",
-    "security_supply_chain": "Tech \u00b7 Software Safety Check",
-    "tech_studio": "Tech \u00b7 App Design Studio",
+    "security_supply_chain": "Tech · Software Safety Check",
+    "tech_studio": "Tech · App Design Studio",
     "growth": "Growth & Partnerships",
-    "security_studio": "Tech \u00b7 Security Architecture Studio",
-    "security_tools": "Tech \u00b7 Defensive Tool Lab",
-    "security_accounts": "Tech \u00b7 Account Security Journal",
-    "social_media": "Media \u00b7 Social Publishing"
+    "security_studio": "Tech · Security Architecture Studio",
+    "security_tools": "Tech · Defensive Tool Lab",
+    "security_accounts": "Tech · Account Security Journal",
+    "social_media": "Media · Social Publishing"
   },
   "roles": {
     "fore_director": [
