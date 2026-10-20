@@ -46,3 +46,8 @@
 .ai-v23-compose textarea{width:100%;resize:vertical;min-height:75px;padding:10px;border:1px solid var(--color-border);border-radius:10px;background:var(--color-surface)}
 .ai-v23-compose>.record-actions{justify-content:space-between;align-items:center}
 @media(max-width:750px){.ai-v23-body{grid-template-columns:1fr}.ai-v23-side{border-right:0;border-bottom:1px solid var(--color-border)}.ai-v23-thread-list{max-height:180px}.fabric-workspace{height:68dvh}.studio-module .studio-properties{width:min(320px,83vw)}.fabric-scroll{padding:15px}}
+
+/* Studios take the full portal viewport; the organisation logo retains navigation. */
+.workspace-layout:has(.studio-module){max-width:none;grid-template-columns:minmax(0,1fr);margin:12px auto}
+.workspace-layout:has(.studio-module)>.workspace-nav{display:none}
+.workspace-layout:has(.studio-module)>.workspace-main{padding:clamp(10px,2vw,22px);min-width:0}
