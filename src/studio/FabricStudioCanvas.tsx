@@ -92,8 +92,8 @@ export function FabricStudioCanvas({doc,edit,record,selection,setSelection,mode,
  return <div className="fabric-workspace" ref={outer}>
   {!readOnly&&<div className="fabric-controls">
    <label>Artboard <select aria-label="Artboard size preset" value="" onChange={e=>{const p=presets.find(x=>x[0]===e.target.value);if(p)dimensions(p[1],p[2]);}}><option value="">Custom size</option>{presets.map(p=><option key={p[0]} value={p[0]}>{p[0]}</option>)}</select></label>
-   <label>W <input aria-label="Artboard width" type="number" min={320} max={2400} value={doc.canvas.width} onChange={e=>dimensions(Number(e.target.value)||320)}/></label>
-   <label>H <input aria-label="Artboard height" type="number" min={320} max={2400} value={doc.canvas.height} onChange={e=>dimensions(Number(e.target.value)||320)}/></label>
+   <label>W <input aria-label="Artboard width" type="number" min={320} max={2400} value={doc.canvas.width} onChange={e=>dimensions(Number(e.target.value)||320,doc.canvas.height)}/></label>
+   <label>H <input aria-label="Artboard height" type="number" min={320} max={2400} value={doc.canvas.height} onChange={e=>dimensions(doc.canvas.width,Number(e.target.value)||320)}/></label>
    <label>Zoom <select value={zoom} onChange={e=>setZoom(e.target.value as typeof zoom)}><option value="fit">Fit</option>{['50','75','100','125','150'].map(z=><option key={z} value={z}>{z}%</option>)}</select></label>
    <label><input type="checkbox" checked={grid} onChange={e=>setGrid(e.target.checked)}/> Grid</label>
    <label><input type="checkbox" checked={snap} onChange={e=>setSnap(e.target.checked)}/> Snap</label>
