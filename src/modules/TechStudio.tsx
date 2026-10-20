@@ -1,4 +1,5 @@
-import {useMemo,useState} from 'react';
+import {useEffect,useMemo,useState} from 'react';
+import {createPortal} from 'react-dom';
 import {mutation} from '../portal-data';
 import {getPortalToken} from '../supabase-portal';
 import {downloadText} from '../v14-utils';
@@ -58,7 +59,16 @@ export function TechStudio(){
   setPerformanceSnapshot(`This browser / this page: response ${f(timing.responseEnd-timing.requestStart)} · DOM ready ${f(timing.domContentLoadedEventEnd)} · load ${f(timing.loadEventEnd)} · document transfer ${transfer}. Not a Lighthouse audit of generated code.`);
  };
  const performanceIssues=[doc.nodes.length>70?'Large canvas: split the page into smaller components.':'Component count is reasonable for a starter.',doc.logic.length>20?'Many logic rules: review event cycles and interactions.':'Logic rule count is manageable.',doc.nodes.some(n=>n.src&&n.src.length>150000)?'Inline image payloads can slow the page. Use optimized media URLs.':'No large inline images detected.', 'Run actual Lighthouse/PageSpeed tests on a deployed URL. This card is only a static design check.'];
- return <section className={`module-section studio-module studio-v2 tech-studio-v2 ${fullscreen?'studio-fullscreen':''}`} aria-label="Tech wireframe builder">
+ // Keep the editing surface outside the narrow portal layout while full screen.
+ useEffect(()=>{
+  if(!fullscreen)return;
+  const oldOverflow=document.body.style.overflow;
+  document.body.style.overflow='hidden';
+  const escape=(event:KeyboardEvent)=>{if(event.key==='Escape')setFullscreen(false);};
+  window.addEventListener('keydown',escape);
+  return()=>{document.body.style.overflow=oldOverflow;window.removeEventListener('keydown',escape);};
+ },[fullscreen]);
+ const studio=<section className={`module-section studio-module studio-v2 tech-studio-v2 ${fullscreen?'studio-fullscreen':''}`} aria-label="Tech wireframe builder">
   <div className="studio-v2-header"><div className="studio-v2-brand"><details className="studio-logo-dropdown"><summary className="studio-logo-menu" title="Open Study0SG navigation"><Study0SGLogo/><span>Study0SG <small>App Wireframe ▾</small></span></summary><nav className="studio-logo-links" aria-label="Studio quick navigation"><a href="#/dashboard?module=dashboard" onClick={()=>setFullscreen(false)}>⌂ Dashboard</a><a href="#/dashboard?module=rag" onClick={()=>setFullscreen(false)}>✦ AI Workspaces</a><a href="#/dashboard?module=my_tasks" onClick={()=>setFullscreen(false)}>☑ My Tasks</a><a href="#/dashboard?module=media_edm" onClick={()=>setFullscreen(false)}>▣ EDM Studio</a></nav></details><Field label="Project name"><input value={title} maxLength={150} onChange={e=>setTitle(e.target.value)}/></Field></div>
    <div className="studio-v2-main-actions"><button className="secondary-button" onClick={undo}>↶</button><button className="secondary-button" onClick={redo}>↷</button><button type="button" onClick={save} disabled={collab.busy}>💾 Save</button><button className="secondary-button" onClick={()=>setShare(v=>!v)}>♧ Share</button><button className="secondary-button" onClick={()=>sourceTarget(target)}>↓ Code</button><button className="secondary-button" onClick={backup}>↓ JSON</button><button className="secondary-button" onClick={()=>exportSVG(doc,'Study0SG-wireframe.svg')}>↓ SVG</button><button className="secondary-button" onClick={()=>setFullscreen(v=>!v)}>{fullscreen?'↙ Exit full screen':'⛶ Full screen'}</button></div>
    <ArtboardSizeControls doc={doc} edit={edit} compact/></div>
@@ -90,4 +100,6 @@ export function TechStudio(){
   <details className="studio-v2-saved"><summary>Saved shared wireframes ({saved.data.filter(s=>s.kind==='wireframe').length})</summary><div className="record-list">{saved.data.filter(s=>s.kind==='wireframe').map(s=><article className="record-card" key={s.id}><strong>{s.title}</strong><button type="button" onClick={()=>open(s)}>Open design</button></article>)}</div><label className="studio-file-import">Import JSON file<input type="file" accept=".json,application/json" onChange={e=>{const f=e.target.files?.[0];if(f)void importJSON(f);e.currentTarget.value='';}}/></label></details>
   <p className="muted-note">Prototype builder: code for non-React languages is a starter scaffold, not a translated executable app. Framework-specific routing, mobile behavior, server authentication, performance audits and accessibility require developer testing. Shared studios use optimistic revision control, not Yjs CRDT synchronization yet.</p>
  </section>;
+ // Fullscreen is portalled above the dashboard, but the editor stays mounted.
+ return fullscreen ? createPortal(studio,document.body) : studio;
 }
