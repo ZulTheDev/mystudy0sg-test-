@@ -1,4 +1,5 @@
 import {useEffect,useMemo,useState} from 'react';
+import {createPortal} from 'react-dom';
 import {downloadText} from '../v14-utils';
 import {useRecords,Notices,Field} from './common';
 import {defaultNode,fitNewNode,PALETTE,normalizeDocument,resizeArtboard,starterPoster,type CanvasNode,type NodeKind} from '../studio/model';
@@ -52,7 +53,16 @@ export function MediaEdm(){
   }catch(e){setError(e instanceof Error?e.message:'AI image service unavailable');}
   finally{setAiBusy(false);}
  };
- return <section className={`module-section studio-module studio-v2 ${fullscreen?'studio-fullscreen':''}`} aria-label="EDM poster editor">
+ // Keep the editing surface outside the narrow portal layout while full screen.
+ useEffect(()=>{
+  if(!fullscreen)return;
+  const oldOverflow=document.body.style.overflow;
+  document.body.style.overflow='hidden';
+  const escape=(event:KeyboardEvent)=>{if(event.key==='Escape')setFullscreen(false);};
+  window.addEventListener('keydown',escape);
+  return()=>{document.body.style.overflow=oldOverflow;window.removeEventListener('keydown',escape);};
+ },[fullscreen]);
+ const studio=<section className={`module-section studio-module studio-v2 ${fullscreen?'studio-fullscreen':''}`} aria-label="EDM poster editor">
   <div className="studio-v2-header"><div className="studio-v2-brand"><details className="studio-logo-dropdown"><summary className="studio-logo-menu" title="Open Study0SG navigation"><Study0SGLogo/> <span>Study0SG <small>EDM Studio ▾</small></span></summary><nav className="studio-logo-links" aria-label="Studio quick navigation"><a href="#/dashboard?module=dashboard" onClick={()=>setFullscreen(false)}>⌂ Dashboard</a><a href="#/dashboard?module=rag" onClick={()=>setFullscreen(false)}>✦ AI Workspaces</a><a href="#/dashboard?module=my_tasks" onClick={()=>setFullscreen(false)}>☑ My Tasks</a><a href="#/dashboard?module=tech_studio" onClick={()=>setFullscreen(false)}>▣ Wireframe Builder</a></nav></details><Field label="Poster name"><input value={title} maxLength={150} onChange={e=>setTitle(e.target.value)}/></Field></div>
     <div className="studio-v2-main-actions"><button className="secondary-button" onClick={undo}>↶</button><button className="secondary-button" onClick={redo}>↷</button><button onClick={save} disabled={collab.busy}>💾 Save layout</button><button className="secondary-button" onClick={()=>setShowCollab(v=>!v)}>♧ Share</button><button className="secondary-button" onClick={()=>exportSVG(doc,'Study0SG-poster.svg')}>↓ SVG</button><button className="secondary-button" onClick={()=>{void exportPNG(doc).catch(e=>setError(String(e)));}}>↓ PNG</button><button className="secondary-button" onClick={backup}>↓ JSON</button><button className="secondary-button" onClick={()=>setFullscreen(v=>!v)}>{fullscreen?'↙ Exit full screen':'⛶ Full screen'}</button></div>
     <ArtboardSizeControls doc={doc} edit={edit} compact/></div>
@@ -78,4 +88,6 @@ export function MediaEdm(){
   <details className="studio-v2-saved"><summary>Saved shared poster layouts ({stored.data.filter(s=>s.kind==='edm').length})</summary><div className="record-list">{stored.data.filter(s=>s.kind==='edm').map(s=><article className="record-card" key={s.id}><strong>{s.title}</strong><p>{new Date(s.updated_at).toLocaleDateString('en-SG')}</p><button type="button" onClick={()=>activate(s)}>Open layout</button></article>)}</div><label className="studio-file-import">Import editable poster JSON<input type="file" accept="application/json,.json" onChange={e=>{const f=e.target.files?.[0];if(f)void importJSON(f);e.currentTarget.value='';}}/></label></details>
   <p className="muted-note">The SVG canvas supports dragging, editing and exports. Team saves use revision checks, not live CRDT merging. Fabric.js, Yjs, Dexie, Workbox and Piscina require further backend/dependency work. Photos remain device-only and are removed by TTL on next cache access.</p>
  </section>;
+ // Fullscreen is portalled above the dashboard, but the editor stays mounted.
+ return fullscreen ? createPortal(studio,document.body) : studio;
 }
