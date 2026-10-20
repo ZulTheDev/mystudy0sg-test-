@@ -18,6 +18,9 @@ export function Knowledge({actorId,isFore,grants}:Props){
  const [projects,setProjects]=useState<Project[]>([]),[threads,setThreads]=useState<Thread[]>([]),[messages,setMessages]=useState<Message[]>([]),[people,setPeople]=useState<Colleague[]>([]);
  const [active,setActive]=useState<string|null>(null),[openedProject,setOpenedProject]=useState<string|null>(null),[input,setInput]=useState(''),[tier,setTier]=useState<'standard'|'pro'>('standard'),[busy,setBusy]=useState(false),[error,setError]=useState(''),[note,setNote]=useState('');
  const [usage,setUsage]=useState<{daily:number;monthly:number}>({daily:0,monthly:0});
+ // These personal limits are shared across saved chats, not reset per thread.
+ const remaining=tier==='pro'?Math.max(0,4-usage.monthly):Math.max(0,10-usage.daily);
+ const personalQuotaReached=scope==='personal'&&remaining===0;
  const [branchFrom,setBranchFrom]=useState<string|null>(null);
  const [search,setSearch]=useState('');
  const canCreateFolder=isFore||grants.some(g=>g.role==='director'||g.department==='executive');
@@ -28,7 +31,7 @@ export function Knowledge({actorId,isFore,grants}:Props){
    db.from('ai_projects').select('id,title,description,department,creator_id,archived_at').order('created_at',{ascending:false}).limit(200),
    db.from('ai_threads').select('id,project_id,parent_thread_id,branch_message_id,title,assistant_profile,owner_id,updated_at,created_at').order('updated_at',{ascending:false}).limit(350),
    db.rpc('v14_chat_directory'),
-   db.from('ai_usage').select('scope,tier,created_at').eq('organizer_id',actorId).limit(1200),
+   db.from('ai_usage').select('scope,tier,created_at').eq('organizer_id',actorId).order('created_at',{ascending:false}).limit(1200),
   ]);
   if(p.error||t.error)throw Error(p.error?.message||t.error?.message||'Could not load AI folders. Apply v2 migration.');
   setProjects((p.data??[]) as Project[]);setThreads((t.data??[]) as Thread[]);
@@ -59,6 +62,7 @@ export function Knowledge({actorId,isFore,grants}:Props){
   }catch(e){setError(String(e));}finally{setBusy(false);}
  };
  const send=async()=>{const prompt=input.trim(),id=active,token=getPortalToken();if(!prompt||!id||busy)return;
+  if(personalQuotaReached){setError(tier==='pro'?'All 4 free Pro messages used this month (UTC). Try Standard or come back next month.':'All 10 Standard messages used today (UTC). Try Pro or come back tomorrow.');return;}
   if(!token){setError('Session expired. Sign in again.');return;}
   setBusy(true);setError('');setInput('');try{
    const r=await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-workspace`,{
@@ -84,7 +88,7 @@ export function Knowledge({actorId,isFore,grants}:Props){
       {projects.filter(x=>!x.archived_at&&(!search.trim()||p.title.toLocaleLowerCase().includes(search.toLocaleLowerCase())||threads.some(t=>t.project_id===p.id&&t.title.toLocaleLowerCase().includes(search.toLocaleLowerCase())))).map(p=><button key={p.id} className={`ai-folder ${openedProject===p.id?'active':''}`} onClick={()=>{setOpenedProject(p.id);setActive(null);}}>📁 {p.title}</button>)}
       {!projects.length&&<p className="hint">No project folders yet. Ask a Director to create one.</p>}
     </>:<><div className="ai-hub-sidebar-heading"><strong>Your private chats</strong><button disabled={busy} onClick={()=>void addThread()}>+ Chat</button></div>
-      <p className="hint">Standard: {Math.max(0,10-usage.daily)}/10 messages remaining today (UTC). Pro: {Math.max(0,4-usage.monthly)}/4 this month.</p>
+      <p className="hint" aria-live="polite">Free Standard: {Math.max(0,10-usage.daily)}/10 messages remaining today (UTC). Free Pro: {Math.max(0,4-usage.monthly)}/4 messages remaining this month (UTC).</p>
     </>}
     {scope==='organization'&&openedProject&&<button className="ai-add-thread" disabled={busy} onClick={()=>void addThread()}>+ New project subthread</button>}
     <div className="ai-thread-list">{visibleThreads.slice().sort((a,b)=>a.created_at.localeCompare(b.created_at)).map(t=><button key={t.id} className={`ai-thread-row ${active===t.id?'active':''}`} style={{paddingLeft:12+depth(t)*15}} onClick={()=>{setActive(t.id);setBranchFrom(null);}}><span>{t.parent_thread_id?'↳':'💬'} {t.title}</span>{t.assistant_profile==='tech_security'&&<small>🛡 Tech consultant</small>}</button>)}</div>
@@ -94,7 +98,7 @@ export function Knowledge({actorId,isFore,grants}:Props){
      <header className="ai-chat-top"><div><strong>{selected.title}</strong><p>{selected.project_id?'Shared Study0SG project':'Private to you'} · {selected.assistant_profile==='tech_security'?'Tech & Security consultant':'General work assistant'}</p></div><div className="ai-chat-toolbar"><button className="secondary-button" type="button" disabled={busy} onClick={()=>void addThread(selected.id)}>↳ Branch chat</button><button type="button" className="secondary-button" onClick={()=>{const lines=[`# ${selected.title}`,`Shared: ${Boolean(selected.project_id)}`,`Exported: ${new Date().toISOString()}`,'',...messages.map(m=>`## ${m.role==='assistant'?'Study0SG AI':people.find(x=>x.id===m.author_id)?.display_name??'Organizer'} · ${new Date(m.created_at).toLocaleString('en-SG')}\n\n${m.body}\n`)];const file=new Blob([lines.join('\n')],{type:'text/markdown'});const url=URL.createObjectURL(file);const a=document.createElement('a');a.href=url;a.download=`Study0SG-chat-${selected.id.slice(0,8)}.md`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}}>↓ Export chat</button></div></header>
      <div className="ai-messages" aria-live="polite">{messages.map(m=><article className={`ai-message ${m.role}`} key={m.id}><div className="ai-message-head"><span className="ai-author-dot" style={{backgroundColor:m.role==='assistant'?'#9b7bce':nameColor(m.author_id??'')}}/><strong style={{color:m.role==='assistant'?'#795bb2':nameColor(m.author_id??'')}}>{m.role==='assistant'?'Study0SG AI':m.author_id===actorId?me:(people.find(p=>p.id===m.author_id)?.display_name??'Organizer')}</strong><time>{new Date(m.created_at).toLocaleString('en-SG',{dateStyle:'short',timeStyle:'short'})}</time></div><div className="ai-message-body">{m.role==='assistant'?<ReactMarkdown remarkPlugins={[remarkGfm]}>{m.body}</ReactMarkdown>:<p>{m.body}</p>}</div>{selected.project_id&&<button className="ai-branch-button" type="button" disabled={busy} onClick={()=>void addThread(selected.id,m.id)}>↳ Create a branch from this reply</button>}</article>)}</div>
      {branchFrom&&<p className="hint">Next message will refer to the selected reply. <button type="button" onClick={()=>setBranchFrom(null)}>Clear</button></p>}
-     <form className="ai-chat-compose" onSubmit={e=>{e.preventDefault();void send();}}><label className="sr-only" htmlFor="ai-prompt">Your message</label><textarea id="ai-prompt" rows={3} maxLength={3000} placeholder="Plan an event, compare ideas, draft a letter, or ask for technical help…" value={input} onChange={e=>setInput(e.target.value)}/><div className="ai-compose-actions"><label>Model <select value={tier} onChange={e=>setTier(e.target.value as 'standard'|'pro')}><option value="standard">Standard · DeepSeek</option><option value="pro">Pro · Higher quota cost</option></select></label><button disabled={busy||input.trim().length<2}>{busy?'Thinking…':'Send message ↗'}</button></div></form>
+     <form className="ai-chat-compose" onSubmit={e=>{e.preventDefault();void send();}}><label className="sr-only" htmlFor="ai-prompt">Your message</label><textarea id="ai-prompt" rows={3} maxLength={3000} placeholder="Plan an event, compare ideas, draft a letter, or ask for technical help…" value={input} onChange={e=>setInput(e.target.value)}/><div className="ai-compose-actions"><label>Model <select value={tier} onChange={e=>setTier(e.target.value as 'standard'|'pro')}><option value="standard">Standard · 10 free/day</option><option value="pro">Pro · 4 free/month</option></select></label>{personalQuotaReached&&<span className="hint" role="status">Free {tier==='pro'?'Pro':'Standard'} quota used. Switch model or wait for the UTC reset.</span>}<button disabled={busy||input.trim().length<2||personalQuotaReached}>{busy?'Thinking…':personalQuotaReached?'Limit reached':'Send message ↗'}</button></div></form>
     </>}
    </div>
   </div>
