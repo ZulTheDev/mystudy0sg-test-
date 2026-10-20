@@ -5,6 +5,7 @@ import {useRecords,useNotice,Notices,Field} from './common';
 import {PALETTE,defaultNode,normalizeDocument,starterWireframe,type CanvasNode,type NodeKind,type StudioDocument} from '../studio/model';
 import {PropertiesPanel} from '../studio/StudioCanvas';
 import {FabricStudioCanvas as StudioCanvas} from '../studio/FabricStudioCanvas';
+import {useLiveStudio} from '../studio/useLiveStudio';
 import {useStudioDocument} from '../studio/useStudioDocument';
 import {LogicBlocks,PreviewInteraction} from '../studio/LogicBlocks';
 import {exportSVG,toReactSource} from '../studio/exporters';
@@ -18,6 +19,7 @@ export function TechStudio(){
  const [logicOpen,setLogicOpen]=useState(false);
  const[title,setTitle]=useState('My Study0SG website design'),[selected,setSelected]=useState<string|null>(null),[preview,setPreview]=useState(false),[fileError,setFileError]=useState('');
  const collab=useStudioCollaboration('wireframe',doc,title,reset,setTitle,saved.refresh,(x)=>normalizeDocument(x,'wireframe'));
+ const liveStatus=useLiveStudio(collab.id,doc,reset);
  const current=useMemo(()=>doc.nodes.find(n=>n.id===selected)??null,[doc.nodes,selected]);
  const add=(kind:NodeKind)=>{const n=defaultNode(kind,doc.nodes.length,'wireframe');edit(d=>({...d,nodes:[...d.nodes,n]}));setSelected(n.id);setPreview(false);};
  const change=(patch:Partial<CanvasNode>)=>edit(d=>({...d,nodes:d.nodes.map(n=>n.id===selected?{...n,...patch}:n)}));
@@ -31,7 +33,7 @@ export function TechStudio(){
   <Notices loading={saved.loading} error={saved.error||collab.error||action.error||fileError} success={action.notice}/>
   <div className="studio-header-fields"><Field label="Project name"><input value={title} maxLength={150} onChange={e=>setTitle(e.target.value)}/></Field><Field label="What will this website help people do?"><input value={doc.explanation} maxLength={350} onChange={e=>edit(d=>({...d,explanation:e.target.value}))}/></Field></div>
   <div className="studio-tabs"><button type="button" className={!preview?'studio-tab-active':'secondary-button'} onClick={()=>setPreview(false)}>Design canvas</button><button type="button" className={preview?'studio-tab-active':'secondary-button'} onClick={()=>setPreview(true)}>▶ Interactive preview</button><button className="secondary-button" type="button" onClick={undo}>↶ Undo</button><button className="secondary-button" type="button" onClick={redo}>↷ Redo</button></div>
-  <div className="studio-floating-actions"><button className="secondary-button" type="button" onClick={()=>setToolOpen(x=>!x)} aria-expanded={toolOpen}>☷ {toolOpen?"Hide tools":"Open elements"}</button><button className="secondary-button" type="button" onClick={()=>setLogicOpen(x=>!x)} aria-expanded={logicOpen}>◇ Logic & APIs</button><button type="button" className="secondary-button" onClick={save} disabled={collab.busy}>Save design</button><details className="studio-team-popover"><summary>↗ Share & collaborate</summary><CollaborationPanel {...collab} save={save}/></details></div><div className="studio-workbench">
+  <div className="studio-floating-actions"><span className="hint" aria-live="polite">Live co-editing: {liveStatus}</span><button className="secondary-button" type="button" onClick={()=>setToolOpen(x=>!x)} aria-expanded={toolOpen}>☷ {toolOpen?"Hide tools":"Open elements"}</button><button className="secondary-button" type="button" onClick={()=>setLogicOpen(x=>!x)} aria-expanded={logicOpen}>◇ Logic & APIs</button><button type="button" className="secondary-button" onClick={save} disabled={collab.busy}>Save design</button><details className="studio-team-popover"><summary>↗ Share & collaborate</summary><CollaborationPanel {...collab} save={save}/></details></div><div className="studio-workbench">
     <aside className={toolOpen?"studio-toolbox fabric-tools-open":"studio-toolbox fabric-tools-closed"}><h3>Page pieces</h3><p className="hint">Click to add, then drag on canvas</p><div className="studio-tool-list">{(['heading','text','button','input','card','table','link','badge','image','rectangle','circle','sticker'] as NodeKind[]).map(k=><button type="button" key={k} className="studio-tool" onClick={()=>add(k)} disabled={doc.nodes.length>=120}><strong>+ {PALETTE[k].title}</strong><small>{PALETTE[k].hint}</small></button>)}</div>
       <h3>Layers</h3><div className="studio-layers">{[...doc.nodes].reverse().map(n=><button type="button" key={n.id} aria-pressed={selected===n.id} className={selected===n.id?'studio-layer selected':'studio-layer'} onClick={()=>setSelected(n.id)}>{n.kind} · {(n.text||'shape').slice(0,18)}</button>)}</div>
     </aside>
