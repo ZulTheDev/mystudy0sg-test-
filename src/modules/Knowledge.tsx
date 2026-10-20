@@ -23,6 +23,14 @@ export function Knowledge({isFore}:{isFore:boolean}){
     catch(e){setError(e instanceof Error?e.message:'AI assistant failed');}
     finally{setBusy(false);}
   };
+  // Export only the current browser session as a Markdown file.
+  const exportConversation=()=>{
+    const parts=['# Study0SG AI conversation',...messages.map(m=>'## '+(m.role==='user'?'Organizer':'Assistant')+'\n\n'+m.content)];
+    const url=URL.createObjectURL(new Blob([parts.join('\n\n')],{type:'text/markdown;charset=utf-8'}));
+    const a=document.createElement('a');
+    a.href=url;a.download='Study0SG-ai-conversation.md';a.click();
+    window.setTimeout(()=>URL.revokeObjectURL(url),1000);
+  };
   const addText=async()=>{
     const token=getPortalToken();if(!token)throw new Error('Session expired');
     const res=await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/knowledge-ingest`,{
@@ -35,8 +43,12 @@ export function Knowledge({isFore}:{isFore:boolean}){
   };
   return <section className="module-section">
     <p className="section-lead">Ask questions about <strong>approved internal Study0SG documents</strong>. Answers use retrieved sources and may decline to answer if evidence is missing. The AI has no write or delete permissions.</p>
+    <div className="record-actions">
+      <button type="button" className="secondary-button" disabled={!messages.length||busy} onClick={exportConversation}>Export this chat (.md)</button>
+      <button type="button" className="secondary-button" disabled={!messages.length||busy} onClick={()=>setMessages([])}>Clear current chat</button>
+    </div>
     <div className="chat-window" aria-live="polite" aria-label="AI conversation">
-      {!messages.length&&<p className="empty-state">Start with “What are our onboarding requirements?” or “How do I submit evidence for VIA hours?”</p>}
+      {!messages.length&&<p className="empty-state">Ask about project planning, workshop materials, task summaries, or how to submit VIA evidence.</p>}
       {messages.map((m,i)=><article key={i} className={`chat-bubble ${m.role}`}>
         <span className="eyebrow">{m.role==='user'?'YOU':'STUDY0SG ASSISTANT'}</span>
         {m.role==='assistant'?<ReactMarkdown remarkPlugins={[remarkGfm]}>{m.content}</ReactMarkdown>:<p>{m.content}</p>}
