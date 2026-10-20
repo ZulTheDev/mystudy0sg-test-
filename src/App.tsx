@@ -78,7 +78,7 @@ const navGroups: NavGroup[] = [
   {key:'support_queue',text:'Support Pool queue'}, {key:'approval_center',text:'Approvals & offboarding'}] },
  { id:'communication',title:'Communicate & Learn',description:'Chat, courses and support',items:[
   {key:'organizer_chat',text:'Organizer chat'}, {key:'learning',text:'Courses & SOPs'},
-  {key:'educator',text:'Educator Circle'}, {key:'rag',text:'AI knowledge assistant'}] },
+  {key:'educator',text:'Educator Circle'}, {key:'rag',text:'AI workspaces · Personal & Projects'}] },
  { id:'growth',title:'Growth & Partnerships',description:'Reports and partner contacts',items:[
   {key:'growth',text:'Growth dashboard'}, {key:'social_media',text:'Social Publishing'}] },
 ];
@@ -221,7 +221,11 @@ function Dashboard(){
    default:return <p>This section is being prepared.</p>;
   }
  })();
- return <main className="dashboard-page">
+ // A studio is one large immersive workspace; only the logo opens navigation.
+ // The assistant keeps a wide conversation panel without the old sidebar.
+ const immersiveStudio=displayed==='media_edm'||displayed==='tech_studio';
+ const wideWorkspace=immersiveStudio||displayed==='rag';
+ return <main className={immersiveStudio?'dashboard-page dashboard-page--studio':wideWorkspace?'dashboard-page dashboard-page--ai':'dashboard-page'}>
    <a className="mobile-skip-link" href="#workspace-content">Skip to main content</a>
    <header className="dashboard-header">
      <div className="brand-navigator" ref={navigatorRef}>
@@ -247,7 +251,7 @@ function Dashboard(){
      <div className="header-actions"><button type="button" className="header-announcements secondary-button" onClick={()=>selectModule('announcements')} aria-label={`Announcements${announcementInbox.unread>0?`, ${announcementInbox.unread} unread`:''}`}><span aria-hidden="true">🔔</span><span className="header-announcements-text">Updates</span>{announcementInbox.unread>0&&<span className="unread-badge" aria-hidden="true">{announcementInbox.unread>99?'99+':announcementInbox.unread}</span>}</button><button type="button" className="theme-toggle secondary-button" aria-label={theme==='dark'?'Switch to light mode':'Switch to dark mode'} onClick={()=>setTheme(t=>t==='dark'?'light':'dark')}><span className="theme-label">{theme==='dark'?'☀ Light mode':'☾ Dark mode'}</span><span className="theme-short" aria-hidden="true">{theme==='dark'?'☀':'☾'}</span></button><span className="header-role">{isFore?'Fore Director · All departments':'Organizer workspace'}</span><button type="button" className="signout-button" onClick={()=>{void signOut();}}>Sign out</button><button className="mobile-menu-toggle secondary-button" type="button" aria-controls="workspace-mobile-nav" aria-expanded={mobileMenuOpen} onClick={()=>setMobileMenuOpen(v=>!v)}>{mobileMenuOpen?'✕ Close':'☰ Menu'}</button></div>
    </header>
    {unreadUrgent&&<div className="urgent-announcement-banner" role="status"><span aria-hidden="true">⚠</span><div><strong>Urgent organizer update</strong><span>{unreadUrgent.title}</span></div><button type="button" className="secondary-button" onClick={()=>selectModule('announcements')}>Read now</button></div>}
-   <div className="workspace-layout">
+   <div className={immersiveStudio?"workspace-layout workspace-layout--studio":wideWorkspace?"workspace-layout workspace-layout--ai":"workspace-layout"}>
      {mobileMenuOpen&&<button type="button" className="mobile-nav-backdrop" aria-label="Close workspace menu" onClick={()=>setMobileMenuOpen(false)}/>}
      <nav id="workspace-mobile-nav" className={`workspace-nav grouped-nav${mobileMenuOpen?' mobile-open':''}`} aria-label="Portal sections">
        <div className="mobile-nav-heading"><span className="eyebrow">YOUR WORKSPACE</span><button className="mobile-menu-close secondary-button" type="button" onClick={()=>setMobileMenuOpen(false)} aria-label="Close navigation">✕</button></div>
@@ -271,8 +275,8 @@ function Dashboard(){
        })}
        <button type="button" className="mobile-drawer-signout secondary-button" onClick={()=>{void signOut();}}>Sign out of Study0SG</button>
      </nav>
-     <section id="workspace-content" className="workspace-main" tabIndex={-1} aria-live="polite"><span className="eyebrow">STUDY0SG VERIFIED ORGANIZER</span>
-       <div className="workspace-title"><h1>{labels[displayed]}</h1>{displayed!=='rag'&&modules.includes('rag')&&<button className="secondary-button" type="button" onClick={()=>selectModule('rag')}>✦ Ask AI</button>}</div>
+     <section id="workspace-content" className={immersiveStudio?"workspace-main workspace-main--studio":wideWorkspace?"workspace-main workspace-main--ai":"workspace-main"} tabIndex={-1} aria-live="polite">{!immersiveStudio&&<span className="eyebrow">STUDY0SG VERIFIED ORGANIZER</span>}
+       <div className={immersiveStudio?"workspace-title workspace-title--studio":"workspace-title"}><h1>{labels[displayed]}</h1>{displayed!=='rag'&&modules.includes('rag')&&<button className="secondary-button" type="button" onClick={()=>selectModule('rag')}>✦ AI workspace</button>}</div>
        <Suspense fallback={<p role="status" className="auth-status">Opening design workspace…</p>}>{content}</Suspense>
      </section>
    </div>
